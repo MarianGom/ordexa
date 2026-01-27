@@ -1,0 +1,119 @@
+<div class="stack-6">
+
+  <div class="row-between">
+    <div>
+      <h1 class="h1">OT #<%= orden.num_orden %></h1>
+      <p class="sub">
+        Trámite: <strong><%= orden.num_tramite %></strong> ·
+        Estado: <span class="badge badge--st-gray"><%= orden.estado_actual %></span>
+      </p>
+    </div>
+
+    <div class="row gap-2">
+      <a href="/ordenes" class="btn btn-outline">← Volver</a>
+
+      <% const rol = user?.rol; %>
+      <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
+        <a href="/ordenes/<%= orden.num_orden %>/editar" class="btn btn-primary">✏ Editar</a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Datos OT -->
+  <div class="card card--shadow-sm">
+    <div class="card__header">
+      <h3 class="card__title">Datos de la orden</h3>
+    </div>
+    <div class="card__content">
+      <div class="grid-2">
+        <div><span class="muted">Nombre trámite</span><div class="strong"><%= orden.nom_tramite %></div></div>
+        <div><span class="muted">Fecha carga</span><div class="strong"><%= orden.fecha_carga %></div></div>
+        <div><span class="muted">Solicitante</span><div class="strong"><%= orden.solicitante %></div></div>
+        <div><span class="muted">Correo</span><div class="strong"><%= orden.correo_solicitante %></div></div>
+        <div><span class="muted">Prioridad</span><div class="strong"><%= orden.prioridad %></div></div>
+        <div><span class="muted">Activa</span><div class="strong"><%= orden.activa ? "Sí" : "No" %></div></div>
+      </div>
+
+      <div class="mt-4">
+        <span class="muted">Descripción</span>
+        <div class="box"><%= orden.descripcion || "—" %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tareas -->
+  <div class="card card--shadow-sm">
+    <div class="card__header row-between">
+      <h3 class="card__title">Tareas</h3>
+
+      <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
+        <a class="btn btn-primary" href="/tareas/nueva?num_orden=<%= orden.num_orden %>">＋ Agregar tarea</a>
+      <% } %>
+    </div>
+
+    <div class="card__content card__content--noPad">
+      <div class="tablewrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Descripción</th>
+              <th class="hide-md">Materiales</th>
+              <th>Técnico</th>
+              <th class="right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (tareas.length) { %>
+              <% tareas.forEach(t => { %>
+                <tr>
+                  <td class="strong"><%= t.id_tarea %></td>
+                  <td><%= t.descripcion || "-" %></td>
+                  <td class="hide-md"><span class="clamp-2"><%= t.materiales || "-" %></span></td>
+                  <td>
+                    <% if (t.tecnico) { %>
+                      <%= t.tecnico.nombre %> <%= t.tecnico.apellido %>
+                    <% } else { %>
+                      <span class="muted">Sin asignar</span>
+                    <% } %>
+                  </td>
+                  <td class="right">
+                    <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
+                      <a class="btn btn-outline btn-sm" href="/tareas/<%= t.id_tarea %>/editar">Editar</a>
+                    <% } else { %>
+                      —
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="5" class="empty">Todavía no hay tareas para esta OT</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial -->
+  <div class="card card--shadow-sm">
+    <div class="card__header">
+      <h3 class="card__title">Historial de estados</h3>
+    </div>
+    <div class="card__content">
+      <% if (historial.length) { %>
+        <ul class="timeline">
+          <% historial.forEach(h => { %>
+            <li class="timeline__item">
+              <div class="timeline__title"><strong><%= h.estado_actual %></strong></div>
+              <div class="timeline__meta muted"><%= h.fecha_cambio %> · <%= h.nota || "—" %></div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <div class="empty">No hay historial todavía</div>
+      <% } %>
+    </div>
+  </div>
+
+</div>

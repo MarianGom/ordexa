@@ -1,0 +1,35 @@
+{
+  "name": "grupo4-candyshop",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "test": "nodemon index.js",
+    "watch:css": "npx tailwindcss -i ./src/public/css/input.css -o ./src/public/css/output.css --watch",
+    "build:css": "npx tailwindcss -i ./src/public/css/input.css -o ./src/public/css/output.css"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^17.2.3",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.0.1",
+    "http-errors": "~1.6.3",
+    "method-override": "^3.0.0",
+    "morgan": "~1.9.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.16.1",
+    "sequelize": "^6.36.0",
+    "sequelize-cli": "^6.6.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "autoprefixer": "^10.4.23",
+    "nodemon": "^3.1.11",
+    "postcss": "^8.5.6"
+  }
+}

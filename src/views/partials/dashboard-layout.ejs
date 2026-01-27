@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || "ORDEXA" %></title>
+
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- ========== SIDEBAR DESKTOP ========== -->
+  <aside class="sidebar">
+
+    <div class="sidebar__brand">
+      <div class="brand__logo">
+        <!-- hex simple -->
+        <img src="/img/logo.png" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      </div>
+      <span class="brand__title">ORDEXA</span>
+    </div>
+<nav class="sidebar__nav">
+
+  <a href="/dashboard"
+     class="navlink <%= currentPath === '/dashboard' ? 'is-active' : '' %>">
+    <img src="/img/app.png" class="navlink__icon" />
+    Dashboard
+  </a>
+
+  <a href="/usuarios"
+     class="navlink <%= currentPath === '/usuarios' ? 'is-active' : '' %>">
+    <img src="/img/team.png" class="navlink__icon" />
+    Gestionar Usuarios
+  </a>
+
+  <a href="/ordenes"
+     class="navlink <%= currentPath === '/ordenes' ? 'is-active' : '' %>">
+    <img src="/img/orden.png" class="navlink__icon" />
+    Gestionar OT
+  </a>
+
+  <a href="/reportes"
+     class="navlink <%= currentPath === '/reportes' ? 'is-active' : '' %>">
+    <img src="/img/estadisticas.png" class="navlink__icon" />
+    Reportes
+  </a>
+
+  <a href="/perfil"
+     class="navlink <%= currentPath === '/perfil' ? 'is-active' : '' %>">
+    <img src="/img/usuario.png" class="navlink__icon" />
+    Perfil
+  </a>
+
+</nav>
+
+
+    <div class="sidebar__footer">
+      <a href="/logout" class="btn btn-ghost" style="width:100%; justify-content:flex-start; gap:.75rem; color:var(--destructive)">
+        <img src="/img/salida.png" class="navlink__icon" />
+        Cerrar Sesión
+      </a>
+    </div>
+
+  </aside>
+
+
+  <!-- ========== MAIN ========== -->
+  <div class="main">
+
+    <!-- ===== Top Header ===== -->
+    <header class="topbar">
+
+      <div class="topbar__date">
+        <%= new Date().toLocaleDateString("es-AR", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric"
+        }) %>
+      </div>
+
+      <!-- User dropdown (JS simple) -->
+      <div style="position:relative">
+
+        <button id="btnUserMenu" class="btn btn-ghost userbox" type="button">
+
+          <div class="avatar">
+            <%= (user?.nombre?.[0] || "U") + (user?.apellido?.[0] || "") %>
+          </div>
+
+          <div class="userbox__meta">
+            <div class="userbox__name">
+              <%= user ? `${user.nombre} ${user.apellido}` : "Usuario" %>
+            </div>
+            <div class="userbox__email">
+              <%= user?.correo || "" %>
+            </div>
+          </div>
+
+          <span class="userbox__chev">▾</span>
+        </button>
+
+        <div id="userMenu"
+             style="
+               position:absolute;
+               right:0;
+               top:110%;
+               width:220px;
+               background:var(--popover);
+               border:1px solid var(--border);
+               border-radius:var(--radius);
+               box-shadow:0 10px 24px rgba(15,23,42,.12);
+               display:none;
+               z-index:20;
+             ">
+
+          <div style="padding:.6rem .75rem; font-size:.75rem; color:var(--muted-foreground)">
+            Mi Cuenta
+          </div>
+
+          <a href="/perfil" class="navlink" style="border-radius:0">
+            👤 Perfil
+          </a>
+
+          <a href="/logout" class="navlink" style="border-radius:0; color:var(--destructive)">
+            ⏻ Cerrar Sesión
+          </a>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- ===== Page Content ===== -->
+    <main class="page">
+      <%- include("../" + contentView) %>
+    </main>
+
+  </div>
+
+</div>
+
+
+<script>
+  const btn = document.getElementById("btnUserMenu");
+  const menu = document.getElementById("userMenu");
+
+  if (btn && menu) {
+    btn.addEventListener("click", () => {
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.style.display = "none";
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

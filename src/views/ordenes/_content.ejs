@@ -1,0 +1,237 @@
+<div class="stack-6">
+
+    <!-- Header -->
+    <div class="row-between">
+        <div>
+            <h1 class="h1">Gestionar Órdenes de Trabajo</h1>
+            <p class="sub">Administra y supervisa todas las órdenes de trabajo del sistema</p>
+        </div>
+
+        <a href="/ordenes/nueva" class="btn btn-primary">
+            <span class="btn__icon">＋</span>
+            Nueva Orden
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card card--shadow-sm">
+        <div class="card__header">
+            <h3 class="card__title">Filtros de Búsqueda</h3>
+        </div>
+
+        <div class="card__content">
+            <form method="GET" action="/ordenes" class="filters">
+
+                <div class="filters__row">
+                    <div class="field field--search">
+                        <span class="field__icon">🔍</span>
+                        <input class="input input--pl" type="text" name="q"
+                            placeholder="Buscar por # Orden o Expediente..." value="<%= filters.q %>" />
+                    </div>
+
+                    <div class="field">
+                        <select class="select" name="estado">
+                            <option value="all" <%=filters.estado==="all" ? "selected" : "" %>>Todos los Estados
+                            </option>
+
+                            <!-- AJUSTÁ estos valores a tus ENUM exactos -->
+                            <option value="En espera" <%=filters.estado==="En espera" ? "selected" : "" %>>En espera
+                            </option>
+                            <option value="En evaluación" <%=filters.estado==="En evaluación" ? "selected" : "" %>>En
+                                evaluación</option>
+                            <option value="En ejecución" <%=filters.estado==="En ejecución" ? "selected" : "" %>>En
+                                ejecución</option>
+                            <option value="Finalizado" <%=filters.estado==="Finalizado" ? "selected" : "" %>>Finalizado
+                            </option>
+                            <option value="Cancelado" <%=filters.estado==="Cancelado" ? "selected" : "" %>>Cancelado
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <select class="select" name="prioridad">
+                            <option value="all" <%=filters.prioridad==="all" ? "selected" : "" %>>Todas las Prioridades
+                            </option>
+
+                            <!-- AJUSTÁ a tu ENUM exacto -->
+                            <option value="Alta" <%=filters.prioridad==="Alta" ? "selected" : "" %>>Alta</option>
+                            <option value="Media" <%=filters.prioridad==="Media" ? "selected" : "" %>>Media</option>
+                            <option value="Baja" <%=filters.prioridad==="Baja" ? "selected" : "" %>>Baja</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filters__row">
+                    <div class="field">
+                        <span class="field__icon">📅</span>
+                        <input class="input input--pl" type="date" name="desde" value="<%= filters.desde %>" />
+                    </div>
+
+                    <div class="field">
+                        <span class="field__icon">📅</span>
+                        <input class="input input--pl" type="date" name="hasta" value="<%= filters.hasta %>" />
+                    </div>
+
+                    <div class="filters__actions">
+                        <a class="btn btn-outline" href="/ordenes">✕ Limpiar Filtros</a>
+                        <button class="btn btn-primary" type="submit">Aplicar</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card card--shadow-sm">
+        <div class="card__content card__content--noPad">
+            <div class="tablewrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th># Orden</th>
+                            <th>Expediente</th>
+                            <th class="hide-md">Descripción</th>
+                            <th class="hide-lg">Técnico Asignado</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                            <th class="right">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% if (ordenes && ordenes.length) { %>
+                            <% ordenes.forEach(o=> { %>
+                                <tr>
+                                    <td class="strong">
+                                        <%= o.num_orden %>
+                                    </td>
+                                    <td>
+                                        <%= o.num_tramite %>
+                                    </td>
+
+                                    <td class="hide-md">
+                                        <span class="clamp-2">
+                                            <%= o.descripcion || "-" %>
+                                        </span>
+                                    </td>
+
+                                    <td class="hide-lg">
+                                        <% if (o.tecnicosResumen) { %>
+                                            <%= o.tecnicosResumen %>
+                                                <% } else { %>
+                                                    <span class="muted">Sin asignar</span>
+                                                    <% } %>
+                                    </td>
+
+
+                                    <td>
+                                        <% if (o.prioridad==="Alta" ) { %>
+                                            <span class="badge badge--prio-high">Alta</span>
+                                            <% } else if (o.prioridad==="Media" ) { %>
+                                                <span class="badge badge--prio-mid">Media</span>
+                                                <% } else { %>
+                                                    <span class="badge badge--prio-low">Baja</span>
+                                                    <% } %>
+                                    </td>
+
+                                    <td>
+                                        <% const st=o.estado_actual || "" ; %>
+                                            <% if (st==="En ejecución" ) { %>
+                                                <span class="badge badge--st-blue">En ejecución</span>
+                                                <% } else if (st==="En evaluación" ) { %>
+                                                    <span class="badge badge--st-yellow">En evaluación</span>
+                                                    <% } else if (st==="En espera" ) { %>
+                                                        <span class="badge badge--st-gray">En espera</span>
+                                                        <% } else if (st==="Finalizado" ) { %>
+                                                            <span class="badge badge--st-green">Finalizado</span>
+                                                            <% } else if (st==="Cancelado" ) { %>
+                                                                <span class="badge badge--st-red">Cancelado</span>
+                                                                <% } else { %>
+                                                                    <span class="badge badge--st-gray">
+                                                                        <%= st || "-" %>
+                                                                    </span>
+                                                                    <% } %>
+                                    </td>
+
+                                    <td class="right">
+                                        <button class="iconbtn" type="button" data-menu-btn>
+                                            …
+                                        </button>
+
+                                        <div class="menu v0-menu is-hidden" data-menu>
+                                            <a class="menu__item" href="/ordenes/<%= o.num_orden %>">👁 Ver Detalles</a>
+                                            <a class="menu__item" href="/ordenes/<%= o.num_orden %>/editar">✏ Editar</a>
+                                            <form method="POST" action="/ordenes/<%= o.num_orden %>/eliminar"
+                                                onsubmit="return confirm('¿Eliminar esta OT?')">
+                                                <button class="menu__item menu__item--danger" type="submit">🗑
+                                                    Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="7" class="empty">No hay órdenes para los filtros seleccionados
+                                            </td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pager">
+                <div class="pager__meta">
+                    Mostrando <%= pagination.from %> a <%= pagination.to %> de <%= pagination.total %> órdenes
+                </div>
+
+                <div class="pager__controls">
+                    <% const qp=new URLSearchParams(filters); %>
+
+                        <% qp.set("page", String(pagination.page - 1)); %>
+                            <a class="btn btn-outline btn-sm <%= pagination.page === 1 ? 'is-disabled' : '' %>"
+                                href="/ordenes?<%= qp.toString() %>">
+                                ‹ Anterior
+                            </a>
+
+                            <div class="pager__nums">
+                                <% for (let p=1; p <=pagination.totalPages; p++) { %>
+                                    <% qp.set("page", String(p)); %>
+                                        <a class="pagebtn <%= p === pagination.page ? 'is-active' : '' %>"
+                                            href="/ordenes?<%= qp.toString() %>">
+                                            <%= p %>
+                                        </a>
+                                        <% } %>
+                            </div>
+
+                            <% qp.set("page", String(pagination.page + 1)); %>
+                                <a class="btn btn-outline btn-sm <%= pagination.page === pagination.totalPages ? 'is-disabled' : '' %>"
+                                    href="/ordenes?<%= qp.toString() %>">
+                                    Siguiente ›
+                                </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // dropdown menú de acciones por fila
+    document.querySelectorAll("[data-menu-btn]").forEach((btn) => {
+        const wrap = btn.parentElement;
+        const menu = wrap.querySelector("[data-menu]");
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll("[data-menu]").forEach(m => m.classList.add("is-hidden"));
+            menu.classList.toggle("is-hidden");
+        });
+    });
+
+    document.addEventListener("click", () => {
+        document.querySelectorAll("[data-menu]").forEach(m => m.classList.add("is-hidden"));
+    });
+</script>

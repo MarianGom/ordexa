@@ -1,0 +1,119 @@
+<!-- Stats -->
+<div class="grid-4">
+
+  <div class="card card--shadow-sm">
+    <div class="card__content">
+      <div class="statrow">
+        <div>
+          <div class="statlabel">Órdenes Pendientes</div>
+          <div class="statvalue"><%= stats?.pendientes ?? 0 %></div>
+        </div>
+        <div class="iconbox iconbox--blue">📋</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--shadow-sm">
+    <div class="card__content">
+      <div class="statrow">
+        <div>
+          <div class="statlabel">En Ejecución</div>
+          <div class="statvalue"><%= stats?.enEjecucion ?? 0 %></div>
+        </div>
+        <div class="iconbox iconbox--amber">🕒</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--shadow-sm">
+    <div class="card__content">
+      <div class="statrow">
+        <div>
+          <div class="statlabel">Finalizadas</div>
+          <div class="statvalue"><%= stats?.finalizadas ?? 0 %></div>
+        </div>
+        <div class="iconbox iconbox--green">✔</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--shadow-sm">
+    <div class="card__content">
+      <div class="statrow">
+        <div>
+          <div class="statlabel">Técnicos Activos</div>
+          <div class="statvalue"><%= stats?.tecnicosActivos ?? 0 %></div>
+        </div>
+        <img src="/img/team.png" alt="" class="iconbox iconbox--purple">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Recent Orders -->
+<div style="margin-top:1.5rem">
+
+  <div class="card card--shadow-sm">
+
+    <div class="card__header">
+      <div class="row-between">
+        <h3 class="card__title">Últimas Órdenes de Trabajo</h3>
+        <a href="/ordenes/nueva" class="btn btn-primary">＋ Nueva Orden</a>
+      </div>
+    </div>
+
+    <div class="card__content">
+      <div class="tablewrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID Orden</th>
+              <th>N° Trámite</th>
+              <th>Solicitante</th>
+              <th>Fecha</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (recientes && recientes.length) { %>
+              <% recientes.forEach(o => { %>
+                <tr>
+                  <td><strong><%= o.num_orden %></strong></td>
+                  <td><%= o.num_tramite %></td>
+                  <td><%= o.solicitante %></td>
+                  <td><%= o.fecha_carga %></td>
+
+                  <td>
+                    <% if (o.prioridad === "Alta") { %>
+                      <span class="badge badge--destructive">Alta</span>
+                    <% } else if (o.prioridad === "Media") { %>
+                      <span class="badge badge--default">Media</span>
+                    <% } else { %>
+                      <span class="badge badge--secondary">Baja</span>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <span class="badge badge--default"><%= o.estado_actual %></span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" style="text-align:center; color:var(--muted-foreground); padding:1.5rem">
+                  No hay órdenes recientes
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
