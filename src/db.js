@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
-require('dotenv').config(); // Carga las variables del archivo .env
+require('dotenv').config();
 
-// Creamos un "pool" de conexiones, que es más eficiente para servidores web
+// Creamos el pool con la configuración extra para la nube
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -10,8 +10,15 @@ const pool = mysql.createPool({
     port: process.env.DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    // --- ESTO ES LO QUE TE FALTABA PARA TIDB ---
+    ssl: {
+        rejectUnauthorized: false
+    }
+    // -------------------------------------------
 });
 
-// Exportamos la promesa para poder usar async/await
+// Un pequeño chivato para ver en los logs si está leyendo las variables
+console.log("🔌 Intentando conectar a la BD en:", process.env.DB_HOST || "LOCALHOST (Error: variable vacía)");
+
 module.exports = pool.promise();
