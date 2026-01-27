@@ -1,20 +1,27 @@
 const mysql = require('mysql2');
+require('dotenv').config();
 
-// PON AQUÍ TUS DATOS DE TIDB DIRECTAMENTE (entre comillas)
-const pool = mysql.createPool({
-    host: 'gateway01.us-east-1.prod.aws.tidbcloud.com', // El host largo de TiDB
-    user: '3wwDy73L2tkJzyt.root',                                  // Tu usuario de TiDB
-    password: 'VCkM5IvLyMvkpoVC',                        // Tu contraseña real
-    database: 'ordexa',
-    port: 4000,                                          // Puerto 4000
+// Detectamos si estamos en la nube (TiDB) o en local
+const dbConfig = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
+    queueLimit: 0
+};
 
-console.log("🔌 Conectando DIRECTO a TiDB...");
+// Solo agregamos SSL si NO estamos en localhost (para que TiDB funcione)
+if (process.env.DB_HOST !== 'localhost') {
+    dbConfig.ssl = {
+        rejectUnauthorized: false
+    };
+}
+
+const pool = mysql.createPool(dbConfig);
+
+console.log(`🔌 Conectando a la base de datos en: ${process.env.DB_HOST}`);
 
 module.exports = pool.promise();
