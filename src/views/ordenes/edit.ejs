@@ -1,0 +1,71 @@
+<% if (error) { %>
+  <div class="alert alert--error"><%= error %></div>
+<% } %>
+
+<form class="otform" method="POST" action="/ordenes/<%= orden.num_orden %>/editar">
+  <div class="otform__section">
+    <h3 class="otform__h3">Editar Orden</h3>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label">N° Trámite</label>
+        <input class="input" name="num_tramite" value="<%= values.num_tramite %>" required>
+      </div>
+
+      <div class="field">
+        <label class="label">Nombre de Trámite</label>
+        <input class="input" name="nom_tramite" value="<%= values.nom_tramite %>" required>
+      </div>
+
+      <div class="field">
+        <label class="label">Solicitante</label>
+        <input class="input" name="solicitante" value="<%= values.solicitante %>" required>
+      </div>
+
+      <div class="field">
+        <label class="label">Correo</label>
+        <input class="input" type="email" name="correo_solicitante" value="<%= values.correo_solicitante %>" required>
+      </div>
+
+      <div class="field">
+        <label class="label">Prioridad</label>
+        <select class="select" name="prioridad" required>
+          <option value="Alta"  <%= values.prioridad==='Alta'?'selected':'' %>>Alta</option>
+          <option value="Media" <%= values.prioridad==='Media'?'selected':'' %>>Media</option>
+          <option value="Baja"  <%= values.prioridad==='Baja'?'selected':'' %>>Baja</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Estado</label>
+        <select class="select" name="estado_actual" required>
+          <% ["En espera","En evaluación","En ejecución","Espera de materiales","Retrasado","Pausado","Finalizado","Cancelado","Fuera de término"].forEach(st=>{ %>
+            <option value="<%= st %>" <%= values.estado_actual===st?'selected':'' %>><%= st %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Responsable</label>
+        <select class="select" name="id_responsable">
+          <option value="">-- Sin responsable --</option>
+          <% responsables.forEach(r=>{ %>
+            <option value="<%= r.id_usuario %>" <%= String(values.id_responsable||'')===String(r.id_usuario)?'selected':'' %>>
+              <%= r.apellido %>, <%= r.nombre %> (<%= r.correo %>)
+            </option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Descripción</label>
+      <textarea class="textarea" name="descripcion" rows="4"><%= values.descripcion || '' %></textarea>
+    </div>
+  </div>
+
+  <div class="otform__actions">
+    <a class="btn btn-outline" href="/ordenes/<%= orden.num_orden %>">Cancelar</a>
+    <button class="btn btn-primary" type="submit">Guardar cambios</button>
+  </div>
+</form>

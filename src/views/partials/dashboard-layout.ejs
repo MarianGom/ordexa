@@ -6,6 +6,7 @@
   <title><%= title || "ORDEXA" %></title>
 
   <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/app.css">
 </head>
 
 <body>
@@ -13,50 +14,48 @@
 <div class="layout">
 
   <!-- ========== SIDEBAR DESKTOP ========== -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
   <aside class="sidebar">
 
-    <div class="sidebar__brand">
-      <div class="brand__logo">
-        <!-- hex simple -->
-        <img src="/img/logo.png" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <div class="sidebar__brand">
+        <div class="brand__logo">
+          <!-- hex simple -->
+          <img src="/img/logo.png" width="22" height="22" alt="logo">
+        </div>
+        <span class="brand__title">ORDEXA</span>
       </div>
-      <span class="brand__title">ORDEXA</span>
-    </div>
-<nav class="sidebar__nav">
+      <nav class="sidebar__nav">
 
-  <a href="/dashboard"
-     class="navlink <%= currentPath === '/dashboard' ? 'is-active' : '' %>">
-    <img src="/img/app.png" class="navlink__icon" />
-    Dashboard
-  </a>
+    <a href="/dashboard"
+      class="navlink <%= currentPath === '/dashboard' ? 'is-active' : '' %>">
+      <img src="/img/app.png" class="navlink__icon" />
+      Dashboard
+    </a>
 
-  <a href="/usuarios"
-     class="navlink <%= currentPath === '/usuarios' ? 'is-active' : '' %>">
-    <img src="/img/team.png" class="navlink__icon" />
-    Gestionar Usuarios
-  </a>
+    <a href="/usuarios"
+      class="navlink <%= currentPath === '/usuarios' ? 'is-active' : '' %>">
+      <img src="/img/team.png" class="navlink__icon" />
+      Gestionar Usuarios
+    </a>
 
-  <a href="/ordenes"
-     class="navlink <%= currentPath === '/ordenes' ? 'is-active' : '' %>">
-    <img src="/img/orden.png" class="navlink__icon" />
-    Gestionar OT
-  </a>
+    <a href="/ordenes"
+      class="navlink <%= currentPath === '/ordenes' ? 'is-active' : '' %>">
+      <img src="/img/orden.png" class="navlink__icon" />
+      Gestionar OT
+    </a>
 
-  <a href="/reportes"
-     class="navlink <%= currentPath === '/reportes' ? 'is-active' : '' %>">
-    <img src="/img/estadisticas.png" class="navlink__icon" />
-    Reportes
-  </a>
+    <a href="/reportes"
+      class="navlink <%= currentPath === '/reportes' ? 'is-active' : '' %>">
+      <img src="/img/estadisticas.png" class="navlink__icon" />
+      Reportes
+    </a>
 
-  <a href="/perfil"
+    <a href="/perfil"
      class="navlink <%= currentPath === '/perfil' ? 'is-active' : '' %>">
     <img src="/img/usuario.png" class="navlink__icon" />
     Perfil
-  </a>
-
-</nav>
-
-
+    </a>
+    </nav>
     <div class="sidebar__footer">
       <a href="/logout" class="btn btn-ghost" style="width:100%; justify-content:flex-start; gap:.75rem; color:var(--destructive)">
         <img src="/img/salida.png" class="navlink__icon" />
@@ -66,14 +65,18 @@
 
   </aside>
 
-
   <!-- ========== MAIN ========== -->
   <div class="main">
 
     <!-- ===== Top Header ===== -->
     <header class="topbar">
+      <div class="topbar__left">
+        <button class="hamburger" id="btnSidebar" aria-expanded="false">
+          <span class="hamburger__bars">☰</span>
+          <span class="hamburger__close">✕</span>
+        </button>
 
-      <div class="topbar__date">
+        <div class="topbar__date">
         <%= new Date().toLocaleDateString("es-AR", {
           weekday: "long",
           year: "numeric",
@@ -81,6 +84,7 @@
           day: "numeric"
         }) %>
       </div>
+    </div>
 
       <!-- User dropdown (JS simple) -->
       <div style="position:relative">
@@ -109,24 +113,25 @@
                right:0;
                top:110%;
                width:220px;
-               background:var(--popover);
-               border:1px solid var(--border);
-               border-radius:var(--radius);
+               background:#ffff;
+               border:1px solid #dce2e7;
+               border-radius:4%;
                box-shadow:0 10px 24px rgba(15,23,42,.12);
                display:none;
                z-index:20;
              ">
 
-          <div style="padding:.6rem .75rem; font-size:.75rem; color:var(--muted-foreground)">
+          <div style="padding:1rem .75rem; font-size:.85rem;font-weight: 600">
             Mi Cuenta
           </div>
 
-          <a href="/perfil" class="navlink" style="border-radius:0">
-            👤 Perfil
+          <a href="/perfil" class="navlink" style="border-radius:0; font-weight: 300;
+               border:1px solid #dce2e7;">
+            <img src="/img/person.png" class="navlink__icon" /> Perfil
           </a>
 
-          <a href="/logout" class="navlink" style="border-radius:0; color:var(--destructive)">
-            ⏻ Cerrar Sesión
+          <a href="/logout" class="navlink_close" style="border-radius:0; border:1px solid #dce2e7; font-weight: 300">
+            <img src="/img/salida.png" class="navlink__icon" />Cerrar Sesión
           </a>
 
         </div>
@@ -144,8 +149,6 @@
   </div>
 
 </div>
-
-
 <script>
   const btn = document.getElementById("btnUserMenu");
   const menu = document.getElementById("userMenu");
@@ -161,6 +164,51 @@
       }
     });
   }
+
+  const btnSidebar = document.getElementById("btnSidebar");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("sidebarOverlay");
+
+  function openSidebar(){
+    sidebar.classList.add("is-open");
+    overlay.classList.add("is-open");
+
+    // 👇 ESTO ES LO QUE FALTABA
+    btnSidebar.classList.add("is-open");
+    btnSidebar.setAttribute("aria-expanded", "true");
+
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSidebar(){
+    sidebar.classList.remove("is-open");
+    overlay.classList.remove("is-open");
+
+    // 👇 ESTO ES LO QUE FALTABA
+    btnSidebar.classList.remove("is-open");
+    btnSidebar.setAttribute("aria-expanded", "false");
+
+    document.body.style.overflow = "";
+  }
+
+  // Toggle (abre y cierra con el mismo botón)
+  btnSidebar?.addEventListener("click", () => {
+    const abierto = sidebar.classList.contains("is-open");
+    if (abierto) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay?.addEventListener("click", closeSidebar);
+
+  // cerrar al tocar un link
+  document.querySelectorAll(".sidebar a").forEach(a=>{
+    a.addEventListener("click", closeSidebar);
+  });
+
+  // cerrar con ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sidebar.classList.contains("is-open")) closeSidebar();
+  });
 </script>
 
 </body>

@@ -1,0 +1,41 @@
+<form class="otform" action="/tareas/<%= tarea.id_tarea %>/editar" method="POST">
+  <input type="hidden" name="num_orden" value="<%= tarea.num_orden %>">
+
+  <div class="otform__section">
+    <h3 class="otform__h3">Tarea #<%= tarea.id_tarea %></h3>
+
+    <div class="field">
+      <label class="label">Descripción</label>
+      <input class="input" name="descripcion" value="<%= tarea.descripcion || '' %>">
+    </div>
+
+    <div class="field">
+      <label class="label">Materiales</label>
+      <textarea class="textarea" name="materiales" rows="3"><%= tarea.materiales || '' %></textarea>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label">Tiempo (min)</label>
+        <input class="input" type="number" min="0" name="tiempo_necesario" value="<%= tarea.tiempo_necesario || '' %>">
+      </div>
+
+      <div class="field">
+        <label class="label">Técnico</label>
+        <select class="select" name="id_tecnico">
+          <option value="">Sin asignar</option>
+          <% (tecnicos || []).forEach(t => { %>
+            <option value="<%= t.id_tecnico %>" <%= String(tarea.id_tecnico || '') === String(t.id_tecnico) ? 'selected' : '' %>>
+              <%= t.apellido %>, <%= t.nombre %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="otform__actions">
+    <button class="btn btn-outline" type="button" data-close-edittarea>Cancelar</button>
+    <button class="btn btn-primary" type="submit">Guardar cambios</button>
+  </div>
+</form>

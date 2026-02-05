@@ -1,6 +1,10 @@
+<div class="dashboard-head">
+  <h1>Dashboard</h1>
+  <p>Resumen de órdenes de trabajo y actividad reciente</p>
+</div>
+
 <!-- Stats -->
 <div class="grid-4">
-
   <div class="card card--shadow-sm">
     <div class="card__content">
       <div class="statrow">
@@ -8,7 +12,7 @@
           <div class="statlabel">Órdenes Pendientes</div>
           <div class="statvalue"><%= stats?.pendientes ?? 0 %></div>
         </div>
-        <div class="iconbox iconbox--blue">📋</div>
+        <div class="iconbox iconbox--blue"><img src="/img/note.png" class="navlink__icon2" /></div>
       </div>
     </div>
   </div>
@@ -17,10 +21,10 @@
     <div class="card__content">
       <div class="statrow">
         <div>
-          <div class="statlabel">En Ejecución</div>
+          <div class="statlabel">En Ejecución            </div>
           <div class="statvalue"><%= stats?.enEjecucion ?? 0 %></div>
         </div>
-        <div class="iconbox iconbox--amber">🕒</div>
+        <div class="iconbox iconbox--amber"><img src="/img/clock.png" class="navlink__icon2" /></div>
       </div>
     </div>
   </div>
@@ -29,10 +33,10 @@
     <div class="card__content">
       <div class="statrow">
         <div>
-          <div class="statlabel">Finalizadas</div>
+          <div class="statlabel">Finalizadas            </div>
           <div class="statvalue"><%= stats?.finalizadas ?? 0 %></div>
         </div>
-        <div class="iconbox iconbox--green">✔</div>
+        <div class="iconbox iconbox--green"><img src="/img/check.png" class="navlink__icon2" /></div>
       </div>
     </div>
   </div>
@@ -41,16 +45,15 @@
     <div class="card__content">
       <div class="statrow">
         <div>
-          <div class="statlabel">Técnicos Activos</div>
+          <div class="statlabel">Técnicos Activos                </div>
           <div class="statvalue"><%= stats?.tecnicosActivos ?? 0 %></div>
         </div>
-        <img src="/img/team.png" alt="" class="iconbox iconbox--purple">
+        <div class="iconbox iconbox--purple"><img src="/img/team2.png" class="navlink__icon2"></div>
       </div>
     </div>
   </div>
 
 </div>
-
 
 <!-- Recent Orders -->
 <div style="margin-top:1.5rem">
@@ -60,7 +63,10 @@
     <div class="card__header">
       <div class="row-between">
         <h3 class="card__title">Últimas Órdenes de Trabajo</h3>
-        <a href="/ordenes/nueva" class="btn btn-primary">＋ Nueva Orden</a>
+        <button type="button" class="btn btn-primary" id="btnNuevaOT">
+            <span class="btn__icon">＋</span>
+            Nueva Orden
+        </button>
       </div>
     </div>
 
@@ -89,16 +95,16 @@
 
                   <td>
                     <% if (o.prioridad === "Alta") { %>
-                      <span class="badge badge--destructive">Alta</span>
+                      <span class="badge badge--prio-high">Alta</span>
                     <% } else if (o.prioridad === "Media") { %>
-                      <span class="badge badge--default">Media</span>
+                      <span class="badge badge--prio-mid">Media</span>
                     <% } else { %>
-                      <span class="badge badge--secondary">Baja</span>
+                      <span class="badge badge--prio-low">Baja</span>
                     <% } %>
                   </td>
 
                   <td>
-                    <span class="badge badge--default"><%= o.estado_actual %></span>
+                    <span class="badge badge--st-gray"><%= o.estado_actual %></span>
                   </td>
                 </tr>
               <% }) %>
@@ -115,5 +121,115 @@
     </div>
 
   </div>
+   <div class="modal" id="modalOT" aria-hidden="true">
+        <div class="modal__backdrop" data-close></div>
+        <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal__close" type="button" data-close>✕</button>
+
+            <h2 class="modal__title" id="modalTitle">Cargar Orden de Trabajo</h2>
+            <p class="modal__sub">Complete los campos para crear una nueva orden de trabajo</p>
+
+            <div class="modal__body" id="modalBody">
+            <div class="modal__loading">Cargando formulario…</div>
+            </div>
+        </div>
+    </div>
 
 </div>
+
+<script>
+ // Formulario Modal Nueva Orden
+const modal = document.getElementById("modalOT");
+const body = document.getElementById("modalBody");
+const btnNueva = document.getElementById("btnNuevaOT");
+
+function initDropzone() {
+  const input = document.getElementById("archivos");
+  const dropzone = document.getElementById("dropzone");
+  const filelist = document.getElementById("filelist");
+
+  if (!input || !dropzone || !filelist) return;
+
+  function renderFiles(files) {
+    filelist.innerHTML = "";
+    if (!files || !files.length) return;
+
+    Array.from(files).forEach(f => {
+      const el = document.createElement("div");
+      el.className = "filechip";
+      el.innerHTML = `
+        <div class="filechip__name">${f.name}</div>
+        <div class="filechip__meta">${Math.round(f.size / 1024)} KB</div>
+      `;
+      filelist.appendChild(el);
+    });
+  }
+
+  input.addEventListener("change", () => renderFiles(input.files));
+
+  ["dragenter","dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("is-dragover");
+    });
+  });
+
+  ["dragleave","drop"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("is-dragover");
+    });
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (files && files.length) {
+      input.files = files;
+      renderFiles(files);
+    }
+  });
+}
+
+function openModal() {
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  fetch("/ordenes/nueva")
+    .then(r => r.text())
+    .then(html => {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const form = doc.querySelector("form");
+
+      body.innerHTML = "";
+      if (form) {
+        body.appendChild(form);
+        initDropzone(); // ✅ engancha eventos cuando ya existe el form
+      } else {
+        body.innerHTML = "<p>No se encontró el formulario.</p>";
+      }
+    })
+    .catch(() => body.innerHTML = "<p>Error cargando formulario.</p>");
+}
+
+function closeModal() {
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  body.innerHTML = `<div class="modal__loading">Cargando formulario…</div>`;
+}
+
+btnNueva?.addEventListener("click", openModal);
+
+// ✅ Event delegation: funciona con botones agregados por fetch
+modal.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) closeModal();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+});
+
+</script>

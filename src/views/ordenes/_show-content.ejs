@@ -1,4 +1,7 @@
-<div class="stack-6">
+<div class="stack-6" id="otPage" data-num-orden="<%= orden.num_orden %>">
+
+  <% const rol = user?.rol; %>
+  <% const canManage = (rol === 1 || rol === 3 || rol === "admin" || rol === "responsable"); %>
 
   <div class="row-between">
     <div>
@@ -12,8 +15,7 @@
     <div class="row gap-2">
       <a href="/ordenes" class="btn btn-outline">← Volver</a>
 
-      <% const rol = user?.rol; %>
-      <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
+      <% if (canManage) { %>
         <a href="/ordenes/<%= orden.num_orden %>/editar" class="btn btn-primary">✏ Editar</a>
       <% } %>
     </div>
@@ -24,6 +26,7 @@
     <div class="card__header">
       <h3 class="card__title">Datos de la orden</h3>
     </div>
+
     <div class="card__content">
       <div class="grid-2">
         <div><span class="muted">Nombre trámite</span><div class="strong"><%= orden.nom_tramite %></div></div>
@@ -46,8 +49,8 @@
     <div class="card__header row-between">
       <h3 class="card__title">Tareas</h3>
 
-      <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
-        <a class="btn btn-primary" href="/tareas/nueva?num_orden=<%= orden.num_orden %>">＋ Agregar tarea</a>
+      <% if (canManage) { %>
+        <button class="btn btn-primary" type="button" id="btnNuevaTarea">＋ Agregar tarea</button>
       <% } %>
     </div>
 
@@ -63,13 +66,15 @@
               <th class="right">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
-            <% if (tareas.length) { %>
+            <% if (tareas && tareas.length) { %>
               <% tareas.forEach(t => { %>
                 <tr>
                   <td class="strong"><%= t.id_tarea %></td>
                   <td><%= t.descripcion || "-" %></td>
                   <td class="hide-md"><span class="clamp-2"><%= t.materiales || "-" %></span></td>
+
                   <td>
                     <% if (t.tecnico) { %>
                       <%= t.tecnico.nombre %> <%= t.tecnico.apellido %>
@@ -77,9 +82,24 @@
                       <span class="muted">Sin asignar</span>
                     <% } %>
                   </td>
+
                   <td class="right">
-                    <% if (rol === 1 || rol === "admin" || rol === "responsable") { %>
-                      <a class="btn btn-outline btn-sm" href="/tareas/<%= t.id_tarea %>/editar">Editar</a>
+                    <% if (canManage) { %>
+                      <button
+                        class="btn btn-outline btn-sm"
+                        type="button"
+                        data-edit-tarea="<%= t.id_tarea %>"
+                        data-num-orden="<%= orden.num_orden %>">
+                        Editar
+                      </button>
+
+                      <form method="POST"
+                            action="/tareas/<%= t.id_tarea %>/eliminar"
+                            style="display:inline"
+                            onsubmit="return confirm('¿Eliminar esta tarea?')">
+                        <input type="hidden" name="num_orden" value="<%= orden.num_orden %>">
+                        <button class="btn btn-outline btn-sm" type="submit">Eliminar</button>
+                      </form>
                     <% } else { %>
                       —
                     <% } %>
@@ -101,7 +121,7 @@
       <h3 class="card__title">Historial de estados</h3>
     </div>
     <div class="card__content">
-      <% if (historial.length) { %>
+      <% if (historial && historial.length) { %>
         <ul class="timeline">
           <% historial.forEach(h => { %>
             <li class="timeline__item">
@@ -116,4 +136,139 @@
     </div>
   </div>
 
+  <!-- Archivos -->
+  <div class="card card--shadow-sm">
+    <div class="card__header">
+      <h3 class="card__title">Archivos adjuntos</h3>
+    </div>
+    <div class="card__content">
+      <% if (orden.archivos && orden.archivos.length) { %>
+        <ul>
+          <% orden.archivos.forEach(a => { %>
+            <li><a href="<%= a.ruta %>" target="_blank"><%= a.nombre %></a></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="muted">Sin adjuntos</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: NUEVA TAREA ===== -->
+  <div class="modal" id="modalTarea" aria-hidden="true">
+    <div class="modal__backdrop" data-close-tarea></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <button class="modal__close" type="button" data-close-tarea>✕</button>
+      <h2 class="modal__title">Agregar tarea</h2>
+      <p class="modal__sub">Completá los campos</p>
+      <div class="modal__body" id="modalTareaBody">
+        <div class="modal__loading">Cargando formulario…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: EDITAR TAREA ===== -->
+  <div class="modal" id="modalEditTarea" aria-hidden="true">
+    <div class="modal__backdrop" data-close-edittarea></div>
+    <div class="modal__panel" role="dialog" aria-modal="true">
+      <button class="modal__close" type="button" data-close-edittarea>✕</button>
+      <h2 class="modal__title">Editar tarea</h2>
+      <p class="modal__sub">Actualizá los datos</p>
+      <div class="modal__body" id="modalEditTareaBody">
+        <div class="modal__loading">Cargando formulario…</div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<script>
+  // ===== Modal NUEVA TAREA =====
+  const btnNuevaTarea = document.getElementById("btnNuevaTarea");
+  const modalTarea = document.getElementById("modalTarea");
+  const modalTareaBody = document.getElementById("modalTareaBody");
+  const NUM_ORDEN = Number(document.getElementById("otPage")?.dataset.numOrden);
+
+  function openModalTarea(){
+    modalTarea.classList.add("is-open");
+    modalTarea.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    fetch(`/ordenes/${NUM_ORDEN}/tareas/nueva`)
+      .then(r => r.text())
+      .then(html => {
+        modalTareaBody.innerHTML = html;
+
+        // Botón cancelar interno
+        modalTareaBody.querySelectorAll("[data-close-tarea]").forEach(el => {
+          el.addEventListener("click", closeModalTarea);
+        });
+      })
+      .catch(() => {
+        modalTareaBody.innerHTML = "<p>Error cargando formulario.</p>";
+      });
+  }
+
+  function closeModalTarea(){
+    modalTarea.classList.remove("is-open");
+    modalTarea.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    modalTareaBody.innerHTML = `<div class="modal__loading">Cargando formulario…</div>`;
+  }
+
+  btnNuevaTarea?.addEventListener("click", openModalTarea);
+  modalTarea.querySelectorAll("[data-close-tarea]").forEach(el => el.addEventListener("click", closeModalTarea));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalTarea.classList.contains("is-open")) closeModalTarea();
+  });
+
+  // ===== Modal EDITAR TAREA =====
+  const modalEdit = document.getElementById("modalEditTarea");
+  const modalEditBody = document.getElementById("modalEditTareaBody");
+
+  function openModalEditTarea(idTarea){
+    modalEdit.classList.add("is-open");
+    modalEdit.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    fetch(`/tareas/${idTarea}/editar`)
+      .then(r => r.text())
+      .then(html => {
+        modalEditBody.innerHTML = html;
+
+        // Botón cancelar interno
+        modalEditBody.querySelectorAll("[data-close-edittarea]").forEach(el => {
+          el.addEventListener("click", closeModalEditTarea);
+        });
+      })
+      .catch(() => {
+        modalEditBody.innerHTML = "<p>Error cargando formulario.</p>";
+      });
+  }
+
+  function closeModalEditTarea(){
+    modalEdit.classList.remove("is-open");
+    modalEdit.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    modalEditBody.innerHTML = `<div class="modal__loading">Cargando formulario…</div>`;
+  }
+
+  document.querySelectorAll("[data-edit-tarea]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const raw = btn.getAttribute("data-edit-tarea");
+    const id = Number(raw);
+
+    if (!id) {
+      alert("ID de tarea inválido. Revisá que t.id_tarea esté llegando.");
+      return;
+    }
+
+    openModalEditTarea(id);
+  });
+});
+
+  modalEdit.querySelectorAll("[data-close-edittarea]").forEach(el => el.addEventListener("click", closeModalEditTarea));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modalEdit.classList.contains("is-open")) closeModalEditTarea();
+  });
+</script>

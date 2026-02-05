@@ -7,10 +7,11 @@
             <p class="sub">Administra y supervisa todas las órdenes de trabajo del sistema</p>
         </div>
 
-        <a href="/ordenes/nueva" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" id="btnNuevaOT">
             <span class="btn__icon">＋</span>
             Nueva Orden
-        </a>
+        </button>
+
     </div>
 
     <!-- Filters -->
@@ -26,7 +27,7 @@
                     <div class="field field--search">
                         <span class="field__icon">🔍</span>
                         <input class="input input--pl" type="text" name="q"
-                            placeholder="Buscar por # Orden o Expediente..." value="<%= filters.q %>" />
+                            placeholder="Buscar por # Órden o Trámite..." value="<%= filters.q %>" />
                     </div>
 
                     <div class="field">
@@ -89,8 +90,8 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th># Orden</th>
-                            <th>Expediente</th>
+                            <th>ID Orden</th>
+                            <th>N° Trámite</th>
                             <th class="hide-md">Descripción</th>
                             <th class="hide-lg">Técnico Asignado</th>
                             <th>Prioridad</th>
@@ -216,22 +217,162 @@
 
         </div>
     </div>
+    <div class="modal" id="modalOT" aria-hidden="true">
+        <div class="modal__backdrop" data-close></div>
+        <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal__close" type="button" data-close>✕</button>
+
+            <h2 class="modal__title" id="modalTitle">Cargar Orden de Trabajo</h2>
+            <p class="modal__sub">Complete los campos para crear una nueva orden de trabajo</p>
+
+            <div class="modal__body" id="modalBody">
+            <div class="modal__loading">Cargando formulario…</div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
 <script>
     // dropdown menú de acciones por fila
-    document.querySelectorAll("[data-menu-btn]").forEach((btn) => {
-        const wrap = btn.parentElement;
-        const menu = wrap.querySelector("[data-menu]");
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            document.querySelectorAll("[data-menu]").forEach(m => m.classList.add("is-hidden"));
-            menu.classList.toggle("is-hidden");
-        });
-    });
+  const GAP = 8;
 
-    document.addEventListener("click", () => {
-        document.querySelectorAll("[data-menu]").forEach(m => m.classList.add("is-hidden"));
+  function closeAllMenus() {
+    document.querySelectorAll("[data-menu]").forEach(m => m.classList.add("is-hidden"));
+  }
+
+  function placeMenu(btn, menu) {
+    const r = btn.getBoundingClientRect();
+
+    let top = r.bottom + GAP;
+    let left = r.right - menu.offsetWidth;
+
+    if (left < GAP) left = GAP;
+
+    // si no entra abajo, lo ponemos arriba
+    if (top + menu.offsetHeight > window.innerHeight - GAP) {
+      top = r.top - menu.offsetHeight - GAP;
+    }
+
+    if (top < GAP) top = GAP;
+
+    menu.style.top = `${top}px`;
+    menu.style.left = `${left}px`;
+  }
+
+  document.querySelectorAll("[data-menu-btn]").forEach((btn) => {
+    const wrap = btn.parentElement;
+    const menu = wrap.querySelector("[data-menu]");
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const estabaAbierto = !menu.classList.contains("is-hidden");
+      closeAllMenus();
+
+      if (!estabaAbierto) {
+        menu.classList.remove("is-hidden");
+        requestAnimationFrame(() => placeMenu(btn, menu));
+      }
     });
+  });
+
+  document.addEventListener("click", closeAllMenus);
+  window.addEventListener("scroll", closeAllMenus, true);
+  window.addEventListener("resize", closeAllMenus);
+
+    // Formulario Modal Nueva Orden
+const modal = document.getElementById("modalOT");
+const body = document.getElementById("modalBody");
+const btnNueva = document.getElementById("btnNuevaOT");
+
+function initDropzone() {
+  const input = document.getElementById("archivos");
+  const dropzone = document.getElementById("dropzone");
+  const filelist = document.getElementById("filelist");
+
+  if (!input || !dropzone || !filelist) return;
+
+  function renderFiles(files) {
+    filelist.innerHTML = "";
+    if (!files || !files.length) return;
+
+    Array.from(files).forEach(f => {
+      const el = document.createElement("div");
+      el.className = "filechip";
+      el.innerHTML = `
+        <div class="filechip__name">${f.name}</div>
+        <div class="filechip__meta">${Math.round(f.size / 1024)} KB</div>
+      `;
+      filelist.appendChild(el);
+    });
+  }
+
+  input.addEventListener("change", () => renderFiles(input.files));
+
+  ["dragenter","dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add("is-dragover");
+    });
+  });
+
+  ["dragleave","drop"].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove("is-dragover");
+    });
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    const files = e.dataTransfer.files;
+    if (files && files.length) {
+      input.files = files;
+      renderFiles(files);
+    }
+  });
+}
+
+function openModal() {
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  fetch("/ordenes/nueva")
+    .then(r => r.text())
+    .then(html => {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const form = doc.querySelector("form");
+
+      body.innerHTML = "";
+      if (form) {
+        body.appendChild(form);
+        initDropzone(); // ✅ engancha eventos cuando ya existe el form
+      } else {
+        body.innerHTML = "<p>No se encontró el formulario.</p>";
+      }
+    })
+    .catch(() => body.innerHTML = "<p>Error cargando formulario.</p>");
+}
+
+function closeModal() {
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  body.innerHTML = `<div class="modal__loading">Cargando formulario…</div>`;
+}
+
+btnNueva?.addEventListener("click", openModal);
+
+// ✅ Event delegation: funciona con botones agregados por fetch
+modal.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) closeModal();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+});
+
 </script>

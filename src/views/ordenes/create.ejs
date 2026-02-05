@@ -1,45 +1,119 @@
-<h1>Nueva Orden de Trabajo</h1>
-
 <% if (error) { %>
-  <p style="color:red;"><%= error %></p>
+  <div class="alert alert--error"><%= error %></div>
 <% } %>
 
-<form action="/ordenes" method="POST">
-  <div>
-    <label>N° Trámite</label><br/>
-    <input name="num_tramite" required value="<%= values.num_tramite || '' %>">
+<form class="otform" action="/ordenes" method="POST" enctype="multipart/form-data">
+  <div class="otform__section">
+    <h3 class="otform__h3">Información del Solicitante</h3>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label">Número de Trámite <span class="req">*</span></label>
+        <input class="input" name="num_tramite" required placeholder="Ej: 2025-001"
+          value="<%= values.num_tramite || '' %>">
+      </div>
+
+      <div class="field">
+        <label class="label">Nombre de Trámite <span class="req">*</span></label>
+        <input class="input" name="nom_tramite" required placeholder="Ej: Reparación de equipo"
+          value="<%= values.nom_tramite || '' %>">
+      </div>
+
+      <div class="field">
+        <label class="label">Solicitante <span class="req">*</span></label>
+        <input class="input" name="solicitante" required placeholder="Nombre completo"
+          value="<%= values.solicitante || '' %>">
+      </div>
+
+      <div class="field">
+        <label class="label">Correo Electrónico <span class="req">*</span></label>
+        <input class="input" type="email" name="correo_solicitante" required placeholder="correo@universidad.edu"
+          value="<%= values.correo_solicitante || '' %>">
+      </div>
+    </div>
   </div>
 
-  <div>
-    <label>Nombre del trámite</label><br/>
-    <input name="nom_tramite" required value="<%= values.nom_tramite || '' %>">
+  <div class="otform__section">
+    <h3 class="otform__h3">Detalles de la Orden</h3>
+
+    <div class="grid-2">
+      <div class="field">
+        <label class="label">Prioridad <span class="req">*</span></label>
+        <select class="select" name="prioridad" required>
+          <option value="">Seleccione prioridad</option>
+          <option value="Alta"  <%= values.prioridad==='Alta' ? 'selected' : '' %>>Alta</option>
+          <option value="Media" <%= values.prioridad==='Media' ? 'selected' : '' %>>Media</option>
+          <option value="Baja"  <%= values.prioridad==='Baja' ? 'selected' : '' %>>Baja</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="label">Fecha de Carga <span class="req">*</span></label>
+        <!-- DATEONLY en la tabla: mandamos YYYY-MM-DD -->
+        <input class="input" type="date" name="fecha_carga" required
+          value="<%= values.fecha_carga || new Date().toISOString().slice(0,10) %>">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Responsable a cargo <span class="req">*</span></label>
+      <select class="select" name="id_responsable" required>
+        <option value="">-- Seleccionar responsable --</option>
+        <% if (responsables && responsables.length) { %>
+          <% responsables.forEach(r => { %>
+            <option value="<%= r.id_usuario %>"
+              <%= (String(values.id_responsable || '') === String(r.id_usuario)) ? "selected" : "" %>>
+              <%= r.apellido %>, <%= r.nombre %> (<%= r.correo %>)
+            </option>
+          <% }) %>
+        <% } %>
+      </select>
+      <p class="help">Este usuario recibe la OT y luego asigna técnicos a las tareas.</p>
+    </div>
+
+    <div class="field">
+      <label class="label">Descripción</label>
+      <textarea class="textarea" name="descripcion" rows="4"
+        placeholder="Describa los detalles de la orden de trabajo..."><%= values.descripcion || '' %></textarea>
+    </div>
+
+  <div class="field">
+    <label class="label">Archivos Adjuntos</label>
+
+    <!-- input real (invisible) -->
+    <input
+      class="file__input"
+      id="archivos"
+      type="file"
+      name="archivos"
+      multiple
+      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+    />
+
+    <!-- dropzone visual -->
+    <label for="archivos" class="dropzone" id="dropzone">
+      <div class="dropzone__icon" aria-hidden="true">
+        <!-- icono tipo v0 -->
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M8 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 14v4a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="dropzone__text">
+        <div class="dropzone__title">Haga clic para subir archivos</div>
+        <div class="dropzone__sub">o arrastre y suelte aquí</div>
+      </div>
+    </label>
+
+    <!-- lista de archivos -->
+    <div class="filelist" id="filelist"></div>
   </div>
 
-  <div>
-    <label>Solicitante</label><br/>
-    <input name="solicitante" required value="<%= values.solicitante || '' %>">
+    <div class="otform__actions">
+    <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+    <button class="btn btn-primary" type="submit">Guardar Orden</button>
   </div>
-
-  <div>
-    <label>Correo solicitante</label><br/>
-    <input type="email" name="correo_solicitante" required value="<%= values.correo_solicitante || '' %>">
-  </div>
-
-  <div>
-    <label>Prioridad</label><br/>
-    <select name="prioridad" required>
-      <option value="">-- elegir --</option>
-      <option value="Alta"  <%= values.prioridad==='Alta' ? 'selected' : '' %>>Alta</option>
-      <option value="Media" <%= values.prioridad==='Media' ? 'selected' : '' %>>Media</option>
-      <option value="Baja"  <%= values.prioridad==='Baja' ? 'selected' : '' %>>Baja</option>
-    </select>
-  </div>
-
-  <div>
-    <label>Descripción</label><br/>
-    <textarea name="descripcion" rows="4"><%= values.descripcion || '' %></textarea>
-  </div>
-
-  <button type="submit">Crear OT</button>
-  <a href="/ordenes">Cancelar</a>
 </form>

@@ -1,0 +1,63 @@
+<%
+// variables esperadas:
+// mode: "create" | "edit"
+// numOrden
+// tarea (opcional)
+// action
+// tecnicos (opcional)
+// closeAttr: atributo para cerrar modal (ej: data-close-tarea o data-close-edittarea)
+%>
+
+<form class="otform" method="POST" action="<%= action %>">
+  <input type="hidden" name="num_orden" value="<%= numOrden %>">
+
+  <div class="grid-2">
+    <div class="field">
+      <label class="label">Descripción <span class="req">*</span></label>
+      <input
+        class="input"
+        name="descripcion"
+        required
+        minlength="3"
+        placeholder="Ej: Revisar equipo / Diagnóstico"
+        value="<%= tarea?.descripcion || '' %>">
+    </div>
+
+    <div class="field">
+      <label class="label">Tiempo (min)</label>
+      <input
+        class="input"
+        type="number"
+        min="0"
+        name="tiempo_necesario"
+        placeholder="Ej: 60"
+        value="<%= tarea?.tiempo_necesario ?? '' %>">
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="label">Materiales</label>
+    <textarea class="textarea" name="materiales" rows="3"
+      placeholder="Ej: Cable, tester, repuesto..."><%= tarea?.materiales || '' %></textarea>
+  </div>
+
+  <div class="field">
+    <label class="label">Técnico (opcional)</label>
+    <select class="select" name="id_tecnico">
+      <option value="">Sin asignar</option>
+      <% (tecnicos || []).forEach(te => { %>
+        <option value="<%= te.id_tecnico %>"
+          <%= String(tarea?.id_tecnico || '') === String(te.id_tecnico) ? 'selected' : '' %>>
+          <%= te.apellido %>, <%= te.nombre %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="otform__actions">
+    <button type="button" class="btn btn-ghost" <%= closeAttr %>>Cancelar</button>
+    <button class="btn btn-primary" type="submit">
+      <%= mode === "edit" ? "Guardar cambios" : "Crear tarea" %>
+    </button>
+  </div>
+</form>

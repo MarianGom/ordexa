@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     nombre: { type: DataTypes.STRING(255), allowNull: false },
     ruta: { type: DataTypes.STRING(500), allowNull: false },
     mime_type: { type: DataTypes.STRING(120), allowNull: true },
-    subido_en: { type: DataTypes.DATE(3), allowNull: false }
+    subido_en: { type: DataTypes.DATE(3), allowNull: false, defaultValue: DataTypes.NOW}
   }, {
     tableName: "orden_archivo",
     timestamps: false
