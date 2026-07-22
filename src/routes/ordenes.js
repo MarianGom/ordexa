@@ -16,7 +16,7 @@ router.get("/ordenes", authMiddleware, ordenesController.index);
 router.get("/ordenes/:id", authMiddleware, ordenesController.show);
 
 // Cambiar estado (Responsable + Admin) + OT no cerrada
-router.post( "/ordenes/:id/estado",authMiddleware,  soloRoles("responsable", "admin"),  otAbierta,ordenesController.updateEstado);
+router.post( "/ordenes/:id/estado",authMiddleware,  soloRoles("responsable", "admin"),ordenesController.updateEstado);
 router.get("/ordenes/:id/editar",
   authMiddleware,
   soloRoles("responsable", "admin"),
@@ -29,5 +29,12 @@ router.post("/ordenes/:id/editar",
   soloRoles("responsable", "admin"),
   otAbierta,
   ordenesController.update
+);
+
+router.post(
+  "/ordenes/:id/eliminar",
+  authMiddleware,
+  soloRoles("admin"),
+  ordenesController.destroy
 );
 module.exports = router;

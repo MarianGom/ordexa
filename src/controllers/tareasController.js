@@ -67,7 +67,7 @@ editForm: async (req, res) => {
   update: async (req, res) => {
     try {
       const id_tarea = Number(req.params.id);
-      const { descripcion, materiales, tiempo_necesario, id_tecnico, num_orden } = req.body;
+      const { descripcion, materiales, tiempo_necesario, id_tecnico} = req.body;
       const tarea = await db.Tarea.findByPk(id_tarea);
       if (!tarea) return res.status(404).send("Tarea no encontrada");
 
@@ -78,7 +78,7 @@ editForm: async (req, res) => {
   id_tecnico: id_tecnico ? Number(id_tecnico) : null
 });
 
-      return res.redirect(`/ordenes/${num_orden || tarea.num_orden}`);
+      return res.redirect(`/ordenes/${tarea.num_orden}`);
     } catch (error) {
       console.error("Error actualizando tarea:", error);
       return res.status(500).send(error.message);
@@ -86,20 +86,25 @@ editForm: async (req, res) => {
   },
 
   destroy: async (req, res) => {
-    try {
-      const id_tarea = Number(req.params.id);
-      const { num_orden } = req.body;
+  try {
+    const id_tarea = Number(req.params.id);
 
-      const tarea = await db.Tarea.findByPk(id_tarea);
-      if (!tarea) return res.status(404).send("Tarea no encontrada");
+    const tarea = await db.Tarea.findByPk(id_tarea);
 
-      await tarea.destroy();
-      return res.redirect(`/ordenes/${num_orden || tarea.num_orden}`);
-    } catch (error) {
-      console.error("Error eliminando tarea:", error);
-      return res.status(500).send(error.message);
+    if (!tarea) {
+      return res.status(404).send("Tarea no encontrada");
     }
+
+    const numOrden = tarea.num_orden;
+
+    await tarea.destroy();
+
+    return res.redirect(`/ordenes/${numOrden}`);
+  } catch (error) {
+    console.error("Error eliminando tarea:", error);
+    return res.status(500).send(error.message);
   }
+}
 };
 
 module.exports = tareasController;

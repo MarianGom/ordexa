@@ -378,39 +378,108 @@ const ordenesController = {
   },
 
   update: async (req, res) => {
-    try {
-      const numOrden = Number(req.params.id);
-      if (!numOrden) return res.status(400).send("ID inválido");
+  const t = await db.sequelize.transaction();
 
-      const orden = await db.OrdenTrabajo.findByPk(numOrden);
-      if (!orden) return res.status(404).send("Orden no encontrada");
+  try {
+    const numOrden = Number(req.params.id);
 
-      const {
-        num_tramite,
-        nom_tramite,
-        solicitante,
-        correo_solicitante,
-        prioridad,
-        descripcion,
-        id_responsable,
-      } = req.body;
-
-      await orden.update({
-        num_tramite,
-        nom_tramite,
-        solicitante,
-        correo_solicitante,
-        prioridad,
-        descripcion: descripcion || null,
-        id_responsable: id_responsable ? Number(id_responsable) : null,
-      });
-
-      return res.redirect(`/ordenes/${numOrden}`);
-    } catch (error) {
-      console.error("UPDATE OT ERROR:", error);
-      return res.status(500).send("Error al actualizar OT");
+    if (!numOrden) {
+      await t.rollback();
+      return res.status(400).send("ID inválido");
     }
+
+    const orden = await db.OrdenTrabajo.findByPk(numOrden, {
+      transaction: t,
+    });
+
+    if (!orden) {
+      await t.rollback();
+      return res.status(404).send("Orden no encontrada");
+    }
+
+    const {
+      num_tramite,
+      nom_tramite,
+      solicitante,
+      correo_solicitante,
+      prioridad,
+      estado_actual,
+      descripcion,
+      id_responsable,
+    } = req.body;
+
+    const estadoAnterior = orden.estado_actual;
+    const cambioEstado = estadoAnterior !== estado_actual;
+
+    await orden.update(
+      {
+        num_tramite,
+        nom_tramite,
+        solicitante,
+        correo_solicitante,
+        prioridad,
+        estado_actual,
+        descripcion: descripcion || null,
+        id_responsable: id_responsable
+          ? Number(id_responsable)
+          : null,
+      },
+      {
+        transaction: t,
+      },
+    );
+
+    if (cambioEstado) {
+      await db.EstadoHistorial.create(
+        {
+          num_orden: numOrden,
+          estado_actual,
+          fecha_cambio: new Date(),
+          id_usuario_cambio: req.session.user.id_usuario,
+          nota: `Estado cambiado de "${estadoAnterior}" a "${estado_actual}" desde la edición de la orden.`,
+        },
+        {
+          transaction: t,
+        },
+      );
+    }
+
+    await t.commit();
+
+    return res.redirect(`/ordenes/${numOrden}`);
+  } catch (error) {
+    await t.rollback();
+
+    console.error("UPDATE OT ERROR:", error);
+
+    return res.status(500).send("Error al actualizar OT");
   }
+},
+destroy: async (req, res) => {
+  try {
+    const numOrden = Number(req.params.id);
+
+    if (!numOrden) {
+      return res.status(400).send("ID inválido");
+    }
+
+    const orden = await db.OrdenTrabajo.findByPk(numOrden);
+
+    if (!orden) {
+      return res.status(404).send("Orden no encontrada");
+    }
+
+    await orden.update({
+      activa: false,
+    });
+
+    return res.redirect("/ordenes");
+
+  } catch (error) {
+    console.error("ERROR DESACTIVANDO OT:", error);
+    return res.status(500).send("No se pudo eliminar la orden.");
+  }
+},
 };
 
 module.exports = ordenesController;
