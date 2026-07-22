@@ -1,0 +1,206 @@
+<div class="stack-6">
+
+    <!-- HEADER -->
+    <div class="row-between">
+
+        <div>
+            <h1 class="h1">Editar Usuario</h1>
+            <p class="sub">
+                Modifica los datos del usuario
+            </p>
+        </div>
+
+        <a href="/usuarios" class="btn btn-outline">
+            ← Volver
+        </a>
+
+    </div>
+
+    <% if (error) { %>
+
+        <div class="card">
+            <div class="card__content">
+                <p style="color:#dc2626;font-weight:600;">
+                    <%= error %>
+                </p>
+            </div>
+        </div>
+
+    <% } %>
+
+    <div class="card card--shadow-sm">
+
+        <div class="card__content">
+
+            <form action="/usuarios/<%= usuario.id_usuario %>" method="POST">
+
+                <div class="filters">
+
+                    <div class="filters__row">
+
+                        <div class="field">
+                            <label>CUIL *</label>
+                            <input
+                                class="input"
+                                type="text"
+                                name="cuil"
+                                required
+                                value="<%= usuario.cuil %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Correo *</label>
+                            <input
+                                class="input"
+                                type="email"
+                                name="correo"
+                                required
+                                value="<%= usuario.correo %>">
+                        </div>
+
+                    </div>
+
+                    <div class="filters__row">
+
+                        <div class="field">
+                            <label>Nombre *</label>
+                            <input
+                                class="input"
+                                type="text"
+                                name="nombre"
+                                required
+                                value="<%= usuario.nombre %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Apellido *</label>
+                            <input
+                                class="input"
+                                type="text"
+                                name="apellido"
+                                required
+                                value="<%= usuario.apellido %>">
+                        </div>
+
+                    </div>
+
+                    <div class="filters__row">
+
+                        <div class="field">
+                            <label>Teléfono</label>
+                            <input
+                                class="input"
+                                type="text"
+                                name="telefono"
+                                value="<%= usuario.telefono || '' %>">
+                        </div>
+
+                        <div class="field">
+                            <label>Domicilio</label>
+                            <input
+                                class="input"
+                                type="text"
+                                name="domicilio"
+                                value="<%= usuario.domicilio || '' %>">
+                        </div>
+
+                    </div>
+
+                    <div class="filters__row">
+
+                        <div class="field" style="width:100%">
+                            <label>Observaciones</label>
+
+                            <textarea
+                                class="input"
+                                rows="4"
+                                name="observaciones"><%= usuario.observaciones || '' %></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ROL SOLO ADMIN -->
+                    <% if (user && user.id_rol === 1) { %>
+
+                        <div class="filters__row">
+
+                            <div class="field">
+
+                                <label>Rol</label>
+
+                                <select class="select" name="id_rol">
+
+                                    <% roles.forEach(r => { %>
+
+                                        <option
+                                            value="<%= r.id_rol %>"
+                                            <%= usuario.id_rol == r.id_rol ? "selected" : "" %>>
+
+                                            <%= r.nombre %>
+
+                                        </option>
+
+                                    <% }) %>
+
+                                </select>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Nueva contraseña (opcional)</label>
+
+                                <input
+                                    class="input"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Dejar vacío para no cambiar">
+
+                            </div>
+
+                        </div>
+
+                    <% } else { %>
+
+                        <div class="filters__row">
+
+                            <div class="field">
+
+                                <label>Nueva contraseña (opcional)</label>
+
+                                <input
+                                    class="input"
+                                    type="password"
+                                    name="password"
+                                    placeholder="Dejar vacío para no cambiar">
+
+                            </div>
+
+                        </div>
+
+                        <input type="hidden" name="id_rol" value="<%= usuario.id_rol %>">
+
+                    <% } %>
+
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:30px;">
+
+                    <a href="/usuarios" class="btn btn-outline">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        Guardar cambios
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

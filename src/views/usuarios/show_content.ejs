@@ -1,0 +1,115 @@
+<div class="stack-6">
+
+    <div class="row-between">
+
+        <div>
+            <h1 class="h1">Detalle de Usuario</h1>
+            <p class="sub">Información completa del usuario</p>
+        </div>
+
+        <a href="/usuarios" class="btn btn-outline">
+            ← Volver
+        </a>
+
+    </div>
+
+    <div class="card card--shadow-sm">
+
+        <div class="card__content">
+
+            <div class="filters">
+
+                <div class="filters__row">
+
+                    <div class="field">
+                        <label>ID</label>
+                        <div class="input">
+                            <%= usuario.id_usuario %>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Estado</label>
+                        <div>
+                            <% if (usuario.activo) { %>
+                                <span class="badge badge--st-green">Activo</span>
+                            <% } else { %>
+                                <span class="badge badge--st-red">Inactivo</span>
+                            <% } %>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="filters__row">
+
+                    <div class="field">
+                        <label>Nombre</label>
+                        <div class="input">
+                            <%= usuario.nombre %> <%= usuario.apellido %>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>CUIL</label>
+                        <div class="input">
+                            <%= usuario.cuil %>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="filters__row">
+
+                    <div class="field">
+                        <label>Correo</label>
+                        <div class="input">
+                            <%= usuario.correo %>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Teléfono</label>
+                        <div class="input">
+                            <%= usuario.telefono || '-' %>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="filters__row">
+
+                    <div class="field">
+                        <label>Domicilio</label>
+                        <div class="input">
+                            <%= usuario.domicilio || '-' %>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Rol</label>
+                        <div class="input">
+                            <%= usuario.rol?.nombre || '-' %>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="filters__row">
+
+                    <div class="field" style="width:100%">
+                        <label>Observaciones</label>
+                        <div class="input">
+                            <%= usuario.observaciones || '-' %>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -24,12 +24,14 @@ const ordenesRouter = require("./routes/ordenes");
 const tareasRouter = require("./routes/tareas");
 const reportesRouter = require("./routes/reportes");
 const dashboardRouter = require("./routes/dashboard");
+const usuariosRouter = require("./routes/usuarios");
 
 app.use(dashboardRouter);
 app.use(authRouter);
 app.use(ordenesRouter);
 app.use(tareasRouter);
 app.use(reportesRouter);
+app.use(usuariosRouter);
 
 app.get("/", (req, res) => res.redirect("/login"));
 

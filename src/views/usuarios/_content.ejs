@@ -1,0 +1,174 @@
+<div class="stack-6">
+
+    <!-- HEADER -->
+    <div class="row-between">
+
+        <div>
+            <h1 class="h1">Gestionar Usuarios</h1>
+            <p class="sub">Administra usuarios, roles y permisos del sistema</p>
+        </div>
+
+        <a href="/usuarios/create" class="btn btn-primary">
+            <span class="btn__icon">＋</span>
+            Nuevo Usuario
+        </a>
+
+    </div>
+
+    <!-- CARD TABLE -->
+    <div class="card card--shadow-sm">
+
+        <div class="card__content card__content--noPad">
+
+            <div class="tablewrap">
+
+                <table class="table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>CUIL</th>
+                            <th class="hide-md">Correo</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th class="right">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <% if (usuarios && usuarios.length> 0) { %>
+
+                            <% usuarios.forEach(u=> { %>
+
+                                <tr>
+
+                                    <td class="strong">
+                                        <%= u.id_usuario %>
+                                    </td>
+
+                                    <td>
+                                        <%= u.nombre %>
+                                            <%= u.apellido %>
+                                    </td>
+
+                                    <td>
+                                        <%= u.cuil %>
+                                    </td>
+
+                                    <td class="hide-md">
+                                        <%= u.correo %>
+                                    </td>
+
+                                    <td>
+                                        <% const r=u.rol?.nombre || "" %>
+
+                                            <% if (r==="administrador" ) { %>
+                                                <span class="badge badge--st-red">Administrador</span>
+                                                <% } else if (r==="operario" ) { %>
+                                                    <span class="badge badge--st-blue">Operario</span>
+                                                    <% } else if (r==="responsable" ) { %>
+                                                        <span class="badge badge--st-yellow">Responsable</span>
+                                                        <% } else { %>
+                                                            <span class="badge badge--st-gray">
+                                                                <%= r %>
+                                                            </span>
+                                                            <% } %>
+                                    </td>
+
+                                    <td>
+                                        <% if (u.activo) { %>
+                                            <span class="badge badge--st-green">Activo</span>
+                                            <% } else { %>
+                                                <span class="badge badge--st-red">Inactivo</span>
+                                                <% } %>
+                                    </td>
+
+                                    <td class="right">
+
+                                        <button class="iconbtn" type="button" data-menu-btn>
+                                            …
+                                        </button>
+
+                                        <div class="menu v0-menu is-hidden" data-menu>
+
+                                            <a class="menu__item" href="/usuarios/<%= u.id_usuario %>">
+                                                👁 Ver
+                                            </a>
+
+                                            <a class="menu__item" href="/usuarios/<%= u.id_usuario %>/edit">
+                                                ✏ Editar
+                                            </a>
+
+                                           <%
+    const accion = u.activo ? 'desactivar' : 'activar';
+    const textoBoton = u.activo ? '⛔ Desactivar' : '✅ Activar';
+    const claseBoton = u.activo ? 'menu__item--danger' : '';
+%>
+
+<form
+    method="POST"
+    action="/usuarios/<%= u.id_usuario %>/delete"
+    onsubmit="return confirm('¿Seguro que deseas <%= accion %> este usuario?')">
+
+    <button
+        class="menu__item <%= claseBoton %>"
+        type="submit">
+
+        <%= textoBoton %>
+
+    </button>
+
+</form>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                <% }) %>
+
+                                    <% } else { %>
+
+                                        <tr>
+                                            <td colspan="7" class="empty">
+                                                No hay usuarios registrados
+                                            </td>
+                                        </tr>
+
+                                        <% } %>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    document.querySelectorAll("[data-menu-btn]").forEach((btn) => {
+        const wrap = btn.parentElement;
+        const menu = wrap.querySelector("[data-menu]");
+
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+
+            document.querySelectorAll("[data-menu]")
+                .forEach(m => m.classList.add("is-hidden"));
+
+            menu.classList.toggle("is-hidden");
+        });
+    });
+
+    document.addEventListener("click", () => {
+        document.querySelectorAll("[data-menu]")
+            .forEach(m => m.classList.add("is-hidden"));
+    });
+</script>

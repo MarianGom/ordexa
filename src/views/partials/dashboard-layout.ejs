@@ -32,12 +32,15 @@
       Dashboard
     </a>
 
-    <a href="/usuarios"
-      class="navlink <%= currentPath === '/usuarios' ? 'is-active' : '' %>">
-      <img src="/img/team.png" class="navlink__icon" />
-      Gestionar Usuarios
-    </a>
-
+  <% if (Number(user?.id_rol ?? user?.rol) === 1) { %>
+  <a
+    href="/usuarios"
+    class="navlink <%= currentPath === '/usuarios' ? 'is-active' : '' %>"
+  >
+  <img src="/img/team.png" class="navlink__icon" />
+    Gestionar Usuarios
+  </a>
+<% } %>
     <a href="/ordenes"
       class="navlink <%= currentPath === '/ordenes' ? 'is-active' : '' %>">
       <img src="/img/orden.png" class="navlink__icon" />
