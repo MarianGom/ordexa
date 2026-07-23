@@ -2,7 +2,9 @@
   <div class="card__header">
     <div class="row-between">
       <h3 class="card__title">Últimas Órdenes de Trabajo</h3>
-      <a class="btn btn-primary" href="/ordenes/nueva">＋ Nueva Orden</a>
+      <% if ([1, 2].includes(Number(user?.id_rol ?? user?.rol))) { %>
+        <a class="btn btn-primary" href="/ordenes/nueva">＋ Nueva Orden</a>
+      <% } %>
     </div>
   </div>
 

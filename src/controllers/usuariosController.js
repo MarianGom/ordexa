@@ -184,7 +184,7 @@ const usuariosController = {
         password_hash,
         activo: true
       });
-
+      req.session.flash = { type: "success", message: "Usuario creado correctamente." };
       return res.redirect("/usuarios");
 
     } catch (error) {
@@ -269,7 +269,7 @@ const usuariosController = {
       }
 
       await usuario.save();
-
+      req.session.flash = { type: "success", message: "Usuario actualizado correctamente." };
       return res.redirect("/usuarios");
 
     } catch (error) {
@@ -288,7 +288,10 @@ const usuariosController = {
 
     usuario.activo = !usuario.activo; // Invierte el estado
     await usuario.save();
-
+    req.session.flash = {
+      type: "success",
+      message: usuario.activo ? "Usuario reactivado correctamente." : "Usuario dado de baja correctamente.",
+    };
     return res.redirect("/usuarios");
 
   } catch (error) {

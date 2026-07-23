@@ -1,7 +1,7 @@
 <div class="stack-6" id="otPage" data-num-orden="<%= orden.num_orden %>">
 
-  <% const rol = user?.rol; %>
-  <% const canManage = (rol === 1 || rol === 3 || rol === "admin" || rol === "responsable"); %>
+  <% const rol = Number(user?.id_rol ?? user?.rol); %>
+  <% const canManage = rol === 1 || (rol === 3 && Number(orden.id_responsable) === Number(user?.id_usuario)); %>
 
   <div class="row-between">
     <div>

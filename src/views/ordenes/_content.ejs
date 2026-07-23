@@ -1,4 +1,9 @@
 <div class="stack-6">
+    <%
+      const roleId = Number(user?.id_rol ?? user?.rol);
+      const canCreateOrder = roleId === 1 || roleId === 2;
+      const canDeleteOrder = roleId === 1;
+    %>
 
     <!-- Header -->
     <div class="row-between">
@@ -7,10 +12,12 @@
             <p class="sub">Administra y supervisa todas las órdenes de trabajo del sistema</p>
         </div>
 
+        <% if (canCreateOrder) { %>
         <button type="button" class="btn btn-primary" id="btnNuevaOT">
             <span class="btn__icon">＋</span>
             Nueva Orden
         </button>
+        <% } %>
 
     </div>
 
@@ -162,12 +169,16 @@
 
                                         <div class="menu v0-menu is-hidden" data-menu>
                                             <a class="menu__item" href="/ordenes/<%= o.num_orden %>">👁 Ver Detalles</a>
-                                            <a class="menu__item" href="/ordenes/<%= o.num_orden %>/editar">✏ Editar</a>
+                                            <% if (roleId === 1 || (roleId === 3 && Number(o.id_responsable) === Number(user.id_usuario))) { %>
+                                              <a class="menu__item" href="/ordenes/<%= o.num_orden %>/editar">✏ Editar</a>
+                                            <% } %>
+                                            <% if (canDeleteOrder) { %>
                                             <form method="POST" action="/ordenes/<%= o.num_orden %>/eliminar"
                                                 onsubmit="return confirm('¿Eliminar esta OT?')">
                                                 <button class="menu__item menu__item--danger" type="submit">🗑
                                                     Eliminar</button>
                                             </form>
+                                            <% } %>
                                         </div>
                                     </td>
                                 </tr>

@@ -146,6 +146,11 @@
 
     <!-- ===== Page Content ===== -->
     <main class="page">
+      <% if (flash) { %>
+        <div class="alert <%= flash.type === 'success' ? 'alert--success' : (flash.type === 'warning' ? 'alert--warning' : 'alert--error') %>" role="status">
+          <%= flash.message %>
+        </div>
+      <% } %>
       <%- include("../" + contentView) %>
     </main>
 

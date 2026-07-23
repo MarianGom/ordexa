@@ -5,6 +5,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const soloRoles = require("../middlewares/soloRoles");
 const otAbiertaPorOrden = require("../middlewares/otAbiertaPorOrden");
 const otAbiertaPorTarea = require("../middlewares/otAbiertaPorTarea");
+const soloResponsableDeOT = require("../middlewares/soloResponsableDeOT");
 const tareasController = require("../controllers/tareasController");
 
 // ===== NUEVA TAREA (id = num_orden) =====
@@ -13,6 +14,7 @@ router.get(
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbiertaPorOrden,
+  soloResponsableDeOT,
   tareasController.newForm
 );
 
@@ -22,6 +24,7 @@ router.post(
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbiertaPorOrden,
+  soloResponsableDeOT,
   tareasController.create
 );
 
@@ -31,6 +34,7 @@ router.get(
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbiertaPorTarea,      // opcional pero recomendable (bloquea si la OT está cerrada)
+  soloResponsableDeOT,
   tareasController.editForm
 );
 
@@ -40,6 +44,7 @@ router.post(
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbiertaPorTarea,
+  soloResponsableDeOT,
   tareasController.update
 );
 
@@ -49,6 +54,7 @@ router.post(
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbiertaPorTarea,
+  soloResponsableDeOT,
   tareasController.destroy
 );
 

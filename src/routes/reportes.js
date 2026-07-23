@@ -9,12 +9,12 @@ const reportesController = require("../controllers/reportesController");
 router.get("/reportes", authMiddleware, soloRoles("admin", "operario", "responsable"), reportesController.index);
 
 // reportes JSON (para que después lo uses con gráficos si querés)
-router.get("/api/reportes/por-estado",authMiddleware,soloRoles("admin", "responsable"), reportesController.porEstado);
+router.get("/api/reportes/por-estado", authMiddleware, soloRoles("admin"), reportesController.porEstado);
 
-router.get("/api/reportes/por-responsable",authMiddleware,soloRoles("admin", "responsable"),reportesController.porResponsable);
+router.get("/api/reportes/por-responsable", authMiddleware, soloRoles("admin", "operario"), reportesController.porResponsable);
 
-router.get("/api/reportes/por-fechas",authMiddleware, soloRoles("admin", "responsable"),reportesController.porFechas);
+router.get("/api/reportes/por-fechas", authMiddleware, soloRoles("admin"), reportesController.porFechas);
 
-router.get("/api/reportes/vencidas",authMiddleware,soloRoles("admin", "responsable"),reportesController.vencidas);
+router.get("/api/reportes/vencidas", authMiddleware, soloRoles("admin"), reportesController.vencidas);
 
 module.exports = router;

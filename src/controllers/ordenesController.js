@@ -1,6 +1,8 @@
 const db = require("../database/models");
 const fs = require("fs/promises");
 const path = require("path");
+const logAudit = require("../helpers/audit");
+const { enviarAltaOrden } = require("../services/notificaciones");
 
 const ITEMS_PER_PAGE = 10; // ajustá si querés 5 como v0
 const { Op } = db.Sequelize;
@@ -234,6 +236,22 @@ if (req.files && req.files.length) {
   });
 }
       await t.commit();
+
+      let mensaje = `OT #${nuevaOT.num_orden} creada correctamente.`;
+      let tipo = "success";
+      try {
+        const notificacion = await enviarAltaOrden(nuevaOT);
+        mensaje += notificacion.enviada
+          ? " Se notificó al solicitante por correo."
+          : " No se envió el correo porque SMTP todavía no está configurado.";
+        if (!notificacion.enviada) tipo = "warning";
+      } catch (errorCorreo) {
+        console.error("No se pudo enviar la notificación:", errorCorreo);
+        mensaje += " La orden fue guardada, pero no se pudo enviar el correo.";
+        tipo = "warning";
+      }
+
+      req.session.flash = { type: tipo, message: mensaje };
       return res.redirect(`/ordenes/${nuevaOT.num_orden}`);
     } catch (error) {
       await t.rollback();
@@ -341,7 +359,17 @@ if (req.files && req.files.length) {
         { transaction: t },
       );
 
+      await logAudit({
+        idUsuario: req.session.user.id_usuario,
+        evento: "CAMBIO_ESTADO",
+        tablaAfectada: "orden_trabajo",
+        idRegistro: numOrden,
+        detalle: `Estado cambiado a ${estado}`,
+        transaction: t,
+      });
+
       await t.commit();
+      req.session.flash = { type: "success", message: `Estado actualizado a "${estado}".` };
       return res.redirect(`/ordenes/${numOrden}`);
     } catch (error) {
       await t.rollback();
@@ -470,8 +498,17 @@ if (req.files && req.files.length) {
       );
     }
 
-    await t.commit();
+    await logAudit({
+      idUsuario: req.session.user.id_usuario,
+      evento: "MODIFICACION",
+      tablaAfectada: "orden_trabajo",
+      idRegistro: numOrden,
+      detalle: `Trámite ${num_tramite}; prioridad ${prioridad}`,
+      transaction: t,
+    });
 
+    await t.commit();
+    req.session.flash = { type: "success", message: `OT #${numOrden} actualizada correctamente.` };
     return res.redirect(`/ordenes/${numOrden}`);
   } catch (error) {
     await t.rollback();
@@ -482,26 +519,39 @@ if (req.files && req.files.length) {
   }
 },
 destroy: async (req, res) => {
+  const t = await db.sequelize.transaction();
   try {
     const numOrden = Number(req.params.id);
 
     if (!numOrden) {
+      await t.rollback();
       return res.status(400).send("ID inválido");
     }
 
-    const orden = await db.OrdenTrabajo.findByPk(numOrden);
+    const orden = await db.OrdenTrabajo.findByPk(numOrden, { transaction: t });
 
     if (!orden) {
+      await t.rollback();
       return res.status(404).send("Orden no encontrada");
     }
 
-    await orden.update({
-      activa: false,
+    await orden.update({ activa: false }, { transaction: t });
+
+    await logAudit({
+      idUsuario: req.session.user.id_usuario,
+      evento: "ELIMINACION",
+      tablaAfectada: "orden_trabajo",
+      idRegistro: numOrden,
+      detalle: `Baja lógica de OT #${numOrden}`,
+      transaction: t,
     });
 
+    await t.commit();
+    req.session.flash = { type: "success", message: `OT #${numOrden} dada de baja correctamente.` };
     return res.redirect("/ordenes");
 
   } catch (error) {
+    if (!t.finished) await t.rollback();
     console.error("ERROR DESACTIVANDO OT:", error);
     return res.status(500).send("No se pudo eliminar la orden.");
   }
@@ -527,6 +577,27 @@ destroyArchivo: async (req, res) => {
     }
 
     const numOrden = archivo.num_orden;
+
+    const orden = await db.OrdenTrabajo.findByPk(numOrden, { transaction: t });
+    if (!orden) {
+      await t.rollback();
+      return res.status(404).send("Orden no encontrada");
+    }
+
+    const roleId = Number(req.session.user.id_rol ?? req.session.user.rol);
+    const esAdmin = roleId === 1;
+    const esResponsableAsignado = roleId === 3 &&
+      Number(orden.id_responsable) === Number(req.session.user.id_usuario);
+
+    if (!esAdmin && !esResponsableAsignado) {
+      await t.rollback();
+      return res.status(403).send("No autorizado para modificar esta orden");
+    }
+
+    if (["Finalizado", "Cancelado"].includes(orden.estado_actual)) {
+      await t.rollback();
+      return res.status(403).send("La orden está cerrada. No se pueden eliminar adjuntos.");
+    }
 
     // La ruta guardada suele ser: /uploads/ot/nombre-archivo.pdf
     // Quitamos la barra inicial para poder unirla con la carpeta public.

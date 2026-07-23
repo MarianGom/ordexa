@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
 const soloRoles = require("../middlewares/soloRoles");
 const otAbierta = require("../middlewares/otAbierta");
+const soloResponsableDeOT = require("../middlewares/soloResponsableDeOT");
 const ordenesController = require("../controllers/ordenesController");
 const uploadOT = require("../middlewares/uploadOT");
 
@@ -16,11 +17,12 @@ router.get("/ordenes", authMiddleware, ordenesController.index);
 router.get("/ordenes/:id", authMiddleware, ordenesController.show);
 
 // Cambiar estado (Responsable + Admin) + OT no cerrada
-router.post( "/ordenes/:id/estado",authMiddleware,  soloRoles("responsable", "admin"),ordenesController.updateEstado);
+router.post("/ordenes/:id/estado", authMiddleware, soloRoles("responsable", "admin"), otAbierta, soloResponsableDeOT, ordenesController.updateEstado);
 router.get("/ordenes/:id/editar",
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbierta,
+  soloResponsableDeOT,
   ordenesController.edit
 );
 
@@ -28,6 +30,7 @@ router.post("/ordenes/:id/editar",
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbierta,
+  soloResponsableDeOT,
   uploadOT.array("archivos", 5),
   ordenesController.update
 );

@@ -1,3 +1,4 @@
+<% const dashboardRoleId = Number(user?.id_rol ?? user?.rol); %>
 <div class="dashboard-head">
   <h1>Dashboard</h1>
   <p>Resumen de órdenes de trabajo y actividad reciente</p>
@@ -63,10 +64,12 @@
     <div class="card__header">
       <div class="row-between">
         <h3 class="card__title">Últimas Órdenes de Trabajo</h3>
+        <% if (dashboardRoleId === 1 || dashboardRoleId === 2) { %>
         <button type="button" class="btn btn-primary" id="btnNuevaOT">
             <span class="btn__icon">＋</span>
             Nueva Orden
         </button>
+        <% } %>
       </div>
     </div>
 
