@@ -44,25 +44,22 @@ const authController = {
   },
 
   forgotPasswordView: (req, res) => res.render("usuarios/recuperar-password", {
-    error: null,
-    message: null,
+    error: null, message: null,
   }),
 
   forgotPasswordProcess: async (req, res) => {
-    const genericMessage = "Si el correo corresponde a una cuenta activa, recibirás un enlace para restablecer la contraseña.";
+    const message = "Si el correo corresponde a una cuenta activa, recibirás un enlace para restablecer la contraseña.";
     try {
       const correo = String(req.body.correo || "").trim().toLowerCase();
       const usuario = await db.Usuario.findOne({ where: { correo, activo: true } });
-
       if (usuario) {
-        const token = createPasswordResetToken(usuario);
-        const resultado = await enviarRecuperacionPassword(usuario, token);
-        if (!resultado.enviada) {
-          console.warn("Recuperación no enviada:", resultado.motivo);
-        }
+        const resultado = await enviarRecuperacionPassword(
+          usuario,
+          createPasswordResetToken(usuario),
+        );
+        if (!resultado.enviada) console.warn("Recuperación no enviada:", resultado.motivo);
       }
-
-      return res.render("usuarios/recuperar-password", { error: null, message: genericMessage });
+      return res.render("usuarios/recuperar-password", { error: null, message });
     } catch (error) {
       console.error("Error solicitando recuperación:", error);
       return res.status(500).render("usuarios/recuperar-password", {
@@ -73,59 +70,37 @@ const authController = {
   },
 
   resetPasswordView: async (req, res) => {
-    try {
-      const token = req.params.token;
-      const idUsuario = getUserIdFromToken(token);
-      const usuario = idUsuario ? await db.Usuario.findByPk(idUsuario) : null;
-      const valid = Boolean(usuario?.activo && verifyPasswordResetToken(token, usuario));
-
-      return res.status(valid ? 200 : 400).render("usuarios/restablecer-password", {
-        token,
-        valid,
-        success: false,
-        error: valid ? null : "El enlace es inválido, ya fue utilizado o venció.",
-      });
-    } catch (error) {
-      console.error("Error validando recuperación:", error);
-      return res.status(400).render("usuarios/restablecer-password", {
-        token: req.params.token,
-        valid: false,
-        success: false,
-        error: "El enlace es inválido o venció.",
-      });
-    }
+    const token = req.params.token;
+    const usuario = await db.Usuario.findByPk(getUserIdFromToken(token));
+    const valid = Boolean(usuario?.activo && verifyPasswordResetToken(token, usuario));
+    return res.status(valid ? 200 : 400).render("usuarios/restablecer-password", {
+      token, valid, success: false,
+      error: valid ? null : "El enlace es inválido, ya fue utilizado o venció.",
+    });
   },
 
   resetPasswordProcess: async (req, res) => {
     const token = req.params.token;
     try {
-      const idUsuario = getUserIdFromToken(token);
-      const usuario = idUsuario ? await db.Usuario.findByPk(idUsuario) : null;
+      const usuario = await db.Usuario.findByPk(getUserIdFromToken(token));
       if (!usuario?.activo || !verifyPasswordResetToken(token, usuario)) {
         return res.status(400).render("usuarios/restablecer-password", {
           token, valid: false, success: false,
           error: "El enlace es inválido, ya fue utilizado o venció.",
         });
       }
-
       const password = String(req.body.password || "");
       const confirmation = String(req.body.password_confirmation || "");
-      if (password.length < 8) {
+      const error = password.length < 8
+        ? "La contraseña debe tener al menos 8 caracteres."
+        : password !== confirmation ? "Las contraseñas no coinciden." : null;
+      if (error) {
         return res.status(400).render("usuarios/restablecer-password", {
-          token, valid: true, success: false,
-          error: "La contraseña debe tener al menos 8 caracteres.",
+          token, valid: true, success: false, error,
         });
       }
-      if (password !== confirmation) {
-        return res.status(400).render("usuarios/restablecer-password", {
-          token, valid: true, success: false,
-          error: "Las contraseñas no coinciden.",
-        });
-      }
-
       usuario.password_hash = await bcrypt.hash(password, 10);
       await usuario.save();
-
       return res.render("usuarios/restablecer-password", {
         token: null, valid: false, success: true, error: null,
       });
