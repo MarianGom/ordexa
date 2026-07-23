@@ -1,62 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/login.css">
   <title>ORDEXA | Login</title>
+  <style>
+    .card__bottom { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; }
+  </style>
 </head>
 <body>
   <main class="login">
-    <!-- Panel izquierdo -->
     <section class="login__brand">
-      <div class="brand">        
-          <img src="/img/logo_nombre.png" alt="ORDEXA" class="brand__logo">
-        <!--<h1 class="brand__title">ORDEXA</h1>-->
-        <p class="brand__subtitle">Sistema de Gestión de Órdenes de Trabajo<br/>Universitario</p>
+      <div class="brand">
+        <img src="/img/logo_nombre.png" alt="ORDEXA" class="brand__logo">
+        <p class="brand__subtitle">Sistema de Gestión de Órdenes de Trabajo<br>Universitario</p>
         <p class="brand__footer">Facultad de Ciencias Exactas y Tecnologías</p>
       </div>
     </section>
 
-    <!-- Panel derecho -->
     <section class="login__form">
       <div class="card">
         <header class="card__header">
-          <h2 class="card__title">Iniciar Sesión</h2>
-          
+          <h1 class="card__title">Iniciar sesión</h1>
           <p class="card__desc">Ingrese sus credenciales para acceder al sistema</p>
         </header>
 
-        <% if (error) { %>
-          <div class="alert"><%= error %></div>
-        <% } %>
+        <% if (error) { %><div class="alert"><%= error %></div><% } %>
 
         <form action="/login" method="POST" class="form">
           <div class="field">
-            <label for="correo">Correo Electrónico</label>
+            <label for="correo">Correo electrónico</label>
             <div class="input">
               <span class="input__icon" aria-hidden="true">✉️</span>
-              <input id="correo" type="email" name="correo" placeholder="usuario@ejemplo.com" required>
+              <input id="correo" type="email" name="correo" placeholder="usuario@ejemplo.com" required autocomplete="email">
             </div>
           </div>
-
           <div class="field">
             <label for="password">Contraseña</label>
             <div class="input">
               <span class="input__icon" aria-hidden="true">🔒</span>
-              <input id="password" type="password" name="password" placeholder="••••••••" required>
-              <!-- (opcional) toggle con JS -->
+              <input id="password" type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
             </div>
           </div>
-
-          <button class="btn" type="submit">Iniciar Sesión</button>
+          <button class="btn" type="submit">Iniciar sesión</button>
         </form>
 
         <div class="card__bottom">
+          <a class="link" href="#">¿Olvidaste tu contraseña?</a>
+          <span aria-hidden="true">·</span>
           <a class="link" href="/consulta">Consultar el estado de una OT</a>
         </div>
       </div>
-
       <footer class="legal">© 2025 Facultad de Ciencias Exactas y Tecnologías</footer>
     </section>
   </main>

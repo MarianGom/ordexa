@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/login.css">
   <title>ORDEXA | Consultar OT</title>
+  <style>
+    .result { margin-top:20px; border-top:1px solid var(--border); padding-top:20px; }
+    .result__row { display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; gap:16px; }
+    .result__label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+    .result__value { font-weight:600; color:var(--text); text-align:right; max-width:60%; }
+    .result__desc { margin-top:12px; font-size:14px; color:var(--text); background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:10px 14px; line-height:1.6; }
+    .estado-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .estado--espera { background:#e2e8f0; color:#475569; }
+    .estado--evaluacion { background:#dbeafe; color:#1e40af; }
+    .estado--ejecucion { background:#dcfce7; color:#15803d; }
+    .estado--materiales { background:#ffedd5; color:#c2410c; }
+    .estado--retrasado, .estado--fuera { background:#fee2e2; color:#b91c1c; }
+    .estado--pausado { background:#fef9c3; color:#a16207; }
+    .estado--finalizado { background:#d1fae5; color:#065f46; }
+    .estado--cancelado { background:#fce7f3; color:#9d174d; }
+    .not-found { margin-top:16px; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px 16px; font-size:14px; color:#c2410c; }
+    .card__bottom { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; }
+  </style>
 </head>
 <body>
   <main class="login">
@@ -15,33 +33,46 @@
         <p class="brand__footer">Facultad de Ciencias Exactas y Tecnologías</p>
       </div>
     </section>
-
     <section class="login__form">
       <div class="card">
         <header class="card__header">
-          <h1 class="card__title">Consultar una orden</h1>
-          <p class="card__desc">Ingresá el número de orden o el número de trámite.</p>
+          <h1 class="card__title">Consultar estado de OT</h1>
+          <p class="card__desc">Ingresá el número de orden o número de trámite recibido por correo</p>
         </header>
         <form action="/consulta" method="GET" class="form">
           <div class="field">
-            <label for="q">Número de orden o trámite</label>
-            <div class="input"><input id="q" name="q" type="text" value="<%= q %>" required autocomplete="off"></div>
+            <label for="q">N° de Orden o N° de Trámite</label>
+            <div class="input">
+              <span class="input__icon" aria-hidden="true">🔎</span>
+              <input id="q" type="text" name="q" placeholder="Ej: 123 o EXP-2025-001" value="<%= q %>" required autocomplete="off">
+            </div>
           </div>
           <button class="btn" type="submit">Buscar</button>
         </form>
-        <% if (notFound) { %><div class="alert">No se encontró una orden activa con ese número.</div><% } %>
+        <% if (notFound) { %><div class="not-found">No se encontró una orden con ese número. Verificá e intentá nuevamente.</div><% } %>
         <% if (orden) { %>
-          <div style="margin-top:1.5rem">
-            <p><strong>Orden:</strong> #<%= orden.num_orden %></p>
-            <p><strong>Trámite:</strong> <%= orden.num_tramite %> - <%= orden.nom_tramite %></p>
-            <p><strong>Estado:</strong> <%= orden.estado_actual %></p>
-            <p><strong>Prioridad:</strong> <%= orden.prioridad %></p>
-            <p><strong>Fecha de carga:</strong> <%= orden.fecha_carga %></p>
-            <% if (orden.descripcion) { %><p><strong>Descripción:</strong> <%= orden.descripcion %></p><% } %>
+          <%
+            const estadoClase = {
+              "En espera":"estado--espera", "En evaluación":"estado--evaluacion",
+              "En ejecución":"estado--ejecucion", "Espera de materiales":"estado--materiales",
+              "Retrasado":"estado--retrasado", "Pausado":"estado--pausado",
+              "Finalizado":"estado--finalizado", "Cancelado":"estado--cancelado",
+              "Fuera de término":"estado--fuera"
+            }[orden.estado_actual] || "estado--espera";
+          %>
+          <div class="result">
+            <div class="result__row"><span class="result__label">N° de orden</span><span class="result__value">#<%= orden.num_orden %></span></div>
+            <div class="result__row"><span class="result__label">N° de trámite</span><span class="result__value"><%= orden.num_tramite %></span></div>
+            <div class="result__row"><span class="result__label">Nombre</span><span class="result__value"><%= orden.nom_tramite %></span></div>
+            <div class="result__row"><span class="result__label">Prioridad</span><span class="result__value"><%= orden.prioridad %></span></div>
+            <div class="result__row"><span class="result__label">Fecha de carga</span><span class="result__value"><%= orden.fecha_carga %></span></div>
+            <div class="result__row"><span class="result__label">Estado</span><span class="result__value"><span class="estado-badge <%= estadoClase %>"><%= orden.estado_actual %></span></span></div>
+            <% if (orden.descripcion) { %><div style="margin-top:12px"><span class="result__label">Descripción</span><div class="result__desc"><%= orden.descripcion %></div></div><% } %>
           </div>
         <% } %>
-        <div class="card__bottom"><a class="link" href="/login">Volver al inicio de sesión</a></div>
+        <div class="card__bottom"><a class="link" href="/login">← Volver al inicio de sesión</a></div>
       </div>
+      <footer class="legal">© 2025 Facultad de Ciencias Exactas y Tecnologías</footer>
     </section>
   </main>
 </body>
