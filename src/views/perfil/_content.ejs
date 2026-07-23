@@ -1,43 +1,17 @@
-<%
-  const rolNombre = usuario.rol?.nombre || "—";
-  const initials = (usuario.nombre?.[0] || "") + (usuario.apellido?.[0] || "");
-  const fmtCuil = (raw) => {
-    if (!raw) return "—";
-    const digits = String(raw).replace(/\D/g, "");
-    return digits.length === 11 ? `${digits.slice(0,2)}-${digits.slice(2,10)}-${digits.slice(10)}` : raw;
-  };
-%>
-<div class="stack-6">
-  <div><h1 class="h1">Mi Perfil</h1><p class="sub">Tus datos en el sistema</p></div>
-
-  <div class="card card--shadow-sm">
-    <div class="card__content" style="display:flex;align-items:center;gap:20px;padding:24px">
-      <div class="avatar" style="width:56px;height:56px;font-size:20px;font-weight:800;flex-shrink:0"><%= initials %></div>
-      <div>
-        <p style="margin:0;font-size:18px;font-weight:800;color:var(--foreground)"><%= usuario.nombre %> <%= usuario.apellido %></p>
-        <p style="margin:4px 0 0;font-size:13px;color:var(--muted-foreground)"><%= usuario.correo %></p>
-        <span class="badge badge--secondary" style="margin-top:8px"><%= rolNombre %></span>
-      </div>
+<section class="card">
+  <div class="card__header">
+    <div>
+      <h1 class="card__title">Mi perfil</h1>
+      <p class="card__desc">Información de la cuenta con la que ingresaste.</p>
     </div>
   </div>
 
-  <div class="card card--shadow-sm">
-    <div class="card__header"><h3 class="card__title">Información personal</h3></div>
-    <div class="card__content">
-      <div class="form-section"><p class="form-section-title">Identificación</p><div class="form-grid-2">
-        <div><p class="form-label">CUIL</p><p class="detail-value"><%= fmtCuil(usuario.cuil) %></p></div>
-        <div><p class="form-label">Correo electrónico</p><p class="detail-value"><a href="mailto:<%= usuario.correo %>" style="color:var(--primary);text-decoration:none"><%= usuario.correo %></a></p></div>
-      </div></div>
-      <div class="form-section"><p class="form-section-title">Datos personales</p><div class="form-grid-2">
-        <div><p class="form-label">Nombre</p><p class="detail-value"><%= usuario.nombre %></p></div>
-        <div><p class="form-label">Apellido</p><p class="detail-value"><%= usuario.apellido %></p></div>
-      </div></div>
-      <div class="form-section"><p class="form-section-title">Contacto</p><div class="form-grid-2">
-        <div><p class="form-label">Teléfono</p><p class="detail-value"><%= usuario.telefono || "—" %></p></div>
-        <div><p class="form-label">Domicilio</p><p class="detail-value"><%= usuario.domicilio || "—" %></p></div>
-      </div></div>
-      <div class="form-section"><p class="form-section-title">Acceso</p><p class="form-label">Rol</p><p class="detail-value"><%= rolNombre %></p></div>
-      <% if (usuario.observaciones) { %><div class="form-section"><p class="form-section-title">Observaciones</p><p style="margin:0;font-size:14px;line-height:1.65"><%= usuario.observaciones %></p></div><% } %>
-    </div>
+  <div class="detail-grid">
+    <div><strong>Nombre</strong><br><%= usuario.nombre %> <%= usuario.apellido %></div>
+    <div><strong>CUIL</strong><br><%= usuario.cuil %></div>
+    <div><strong>Correo</strong><br><%= usuario.correo %></div>
+    <div><strong>Rol</strong><br><%= usuario.rol?.nombre || "Sin rol" %></div>
+    <div><strong>Teléfono</strong><br><%= usuario.telefono || "No informado" %></div>
+    <div><strong>Domicilio</strong><br><%= usuario.domicilio || "No informado" %></div>
   </div>
-</div>
+</section>
