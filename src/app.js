@@ -9,13 +9,16 @@ app.use(express.urlencoded({ extended: true })); // leer formulario HTML
 app.use(express.json()); // leer JSON (API/JS)
 
 app.use(session({
-    secret: 'ordexa_secret', 
+    secret: process.env.SESSION_SECRET || 'ordexa_secret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: { maxAge: 8 * 60 * 60 * 1000 }
 }));
 
 const userToLocals = require("./middlewares/userToLocals");
+const flashMiddleware = require("./middlewares/flashMiddleware");
 app.use(userToLocals);
+app.use(flashMiddleware);
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -25,13 +28,17 @@ const tareasRouter = require("./routes/tareas");
 const reportesRouter = require("./routes/reportes");
 const dashboardRouter = require("./routes/dashboard");
 const usuariosRouter = require("./routes/usuarios");
+const consultaRouter = require("./routes/consulta");
+const perfilRouter = require("./routes/perfil");
 
+app.use(consultaRouter);
 app.use(dashboardRouter);
 app.use(authRouter);
 app.use(ordenesRouter);
 app.use(tareasRouter);
 app.use(reportesRouter);
 app.use(usuariosRouter);
+app.use(perfilRouter);
 
 app.get("/", (req, res) => res.redirect("/login"));
 
@@ -43,4 +50,3 @@ app.listen(PORT, () =>
 );*/
 
 module.exports = app;
-
