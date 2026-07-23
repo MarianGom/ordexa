@@ -53,11 +53,16 @@ const authController = {
       const correo = String(req.body.correo || "").trim().toLowerCase();
       const usuario = await db.Usuario.findOne({ where: { correo, activo: true } });
       if (usuario) {
-        const resultado = await enviarRecuperacionPassword(
-          usuario,
-          createPasswordResetToken(usuario),
-        );
-        if (!resultado.enviada) console.warn("Recuperación no enviada:", resultado.motivo);
+        try {
+          const resultado = await enviarRecuperacionPassword(
+            usuario,
+            createPasswordResetToken(usuario),
+          );
+          if (!resultado.enviada) console.warn("Recuperación no enviada:", resultado.motivo);
+        } catch (errorCorreo) {
+          // No se revela al visitante si el correo existe ni el estado del SMTP.
+          console.error("SMTP recuperación:", errorCorreo.code || errorCorreo.message);
+        }
       }
       return res.render("usuarios/recuperar-password", { error: null, message });
     } catch (error) {

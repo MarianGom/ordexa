@@ -278,11 +278,16 @@ const usuariosController = {
       usuario.domicilio = req.body.domicilio;
       usuario.observaciones = req.body.observaciones;
 
-      if (req.session.user.id_rol === 1) {
-        usuario.id_rol = req.body.id_rol;
+      if (Number(req.session.user.id_rol ?? req.session.user.rol) === 1) {
+        const rolSeleccionado = await db.Rol.findByPk(Number(req.body.id_rol));
+        if (!rolSeleccionado) return res.status(400).send("Rol inválido");
+        usuario.id_rol = rolSeleccionado.id_rol;
       }
 
       if (req.body.password && req.body.password.trim() !== "") {
+        if (req.body.password.length < 8) {
+          return res.status(400).send("La contraseña debe tener al menos 8 caracteres");
+        }
         usuario.password_hash = await bcrypt.hash(req.body.password, 10);
       }
 

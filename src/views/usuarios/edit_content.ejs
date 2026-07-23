@@ -121,7 +121,7 @@
                     </div>
 
                     <!-- ROL SOLO ADMIN -->
-                    <% if (user && user.id_rol === 1) { %>
+                    <% if (Number(user?.id_rol ?? user?.rol) === 1) { %>
 
                         <div class="filters__row">
 
@@ -129,7 +129,7 @@
 
                                 <label>Rol</label>
 
-                                <select class="select" name="id_rol">
+                                <select class="select" name="id_rol" required>
 
                                     <% roles.forEach(r => { %>
 
