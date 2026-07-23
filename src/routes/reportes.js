@@ -6,7 +6,7 @@ const soloRoles = require("../middlewares/soloRoles");
 const reportesController = require("../controllers/reportesController");
 
 // vista principal de reportes
-router.get("/reportes", authMiddleware,soloRoles("admin", "responsable"), reportesController.index);
+router.get("/reportes", authMiddleware, soloRoles("admin", "operario", "responsable"), reportesController.index);
 
 // reportes JSON (para que después lo uses con gráficos si querés)
 router.get("/api/reportes/por-estado",authMiddleware,soloRoles("admin", "responsable"), reportesController.porEstado);
