@@ -1,0 +1,17 @@
+<section class="card">
+  <div class="card__header">
+    <div>
+      <h1 class="card__title">Mi perfil</h1>
+      <p class="card__desc">Información de la cuenta con la que ingresaste.</p>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div><strong>Nombre</strong><br><%= usuario.nombre %> <%= usuario.apellido %></div>
+    <div><strong>CUIL</strong><br><%= usuario.cuil %></div>
+    <div><strong>Correo</strong><br><%= usuario.correo %></div>
+    <div><strong>Rol</strong><br><%= usuario.rol?.nombre || "Sin rol" %></div>
+    <div><strong>Teléfono</strong><br><%= usuario.telefono || "No informado" %></div>
+    <div><strong>Domicilio</strong><br><%= usuario.domicilio || "No informado" %></div>
+  </div>
+</section>
