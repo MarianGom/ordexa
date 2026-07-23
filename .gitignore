@@ -1,2 +1,4 @@
 node_modules/
 .env
+# Archivos adjuntos cargados por usuarios
+src/public/uploads/ot/*
