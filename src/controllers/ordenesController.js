@@ -150,6 +150,26 @@ const ordenesController = {
     });
   },
 
+  verificarTramite: async (req, res) => {
+    try {
+      const numTramite = String(req.query.num_tramite || "").trim();
+      if (!numTramite) return res.json({ existe: false });
+
+      const orden = await db.OrdenTrabajo.findOne({
+        where: { num_tramite: numTramite },
+        attributes: ["num_orden"],
+      });
+
+      return res.json({
+        existe: Boolean(orden),
+        num_orden: orden?.num_orden || null,
+      });
+    } catch (error) {
+      console.error("Error verificando número de trámite:", error);
+      return res.status(500).json({ error: "No se pudo verificar el número de trámite." });
+    }
+  },
+
   store: async (req, res) => {
     const t = await db.sequelize.transaction();
     try {
@@ -199,9 +219,33 @@ const ordenesController = {
         return res.status(401).send("Sesión inválida. Volvé a iniciar sesión.");
       }
 
+      const numeroTramiteNormalizado = String(num_tramite).trim();
+      const tramiteExistente = await db.OrdenTrabajo.findOne({
+        where: { num_tramite: numeroTramiteNormalizado },
+        attributes: ["num_orden"],
+        transaction: t,
+      });
+
+      if (tramiteExistente) {
+        const responsables = await db.Usuario.findAll({
+          where: { id_rol: 3, activo: 1 },
+          attributes: ["id_usuario", "nombre", "apellido", "correo"],
+          order: [["apellido", "ASC"], ["nombre", "ASC"]],
+        });
+        await t.rollback();
+        return res.status(409).render("ordenes/create", {
+          error: `El número de trámite ${numeroTramiteNormalizado} ya está registrado en la OT #${tramiteExistente.num_orden}.`,
+          values: { ...req.body, num_tramite: numeroTramiteNormalizado },
+          title: "Nueva Orden",
+          user: req.session.user,
+          currentPath: "/ordenes",
+          responsables,
+        });
+      }
+
       const nuevaOT = await db.OrdenTrabajo.create(
         {
-          num_tramite,
+          num_tramite: numeroTramiteNormalizado,
           nom_tramite,
           solicitante,
           correo_solicitante,
@@ -263,8 +307,14 @@ if (req.files && req.files.length) {
         ],
       });
      
-      return res.status(500).render("ordenes/create", {
-        error: "No se pudo crear la OT. Revisá consola.",
+      const esTramiteDuplicado =
+        error.name === "SequelizeUniqueConstraintError" &&
+        error.errors?.some((item) => item.path === "num_tramite");
+
+      return res.status(esTramiteDuplicado ? 409 : 500).render("ordenes/create", {
+        error: esTramiteDuplicado
+          ? "Ese número de trámite ya está registrado en otra orden."
+          : "No se pudo crear la OT. Revisá consola.",
         values: req.body,
         title: "Nueva Orden",
         user: req.session.user,
@@ -442,8 +492,10 @@ if (req.files && req.files.length) {
       id_responsable,
     } = req.body;
 
+    const esAdmin = Number(req.session.user.id_rol ?? req.session.user.rol) === 1;
     const estadoAnterior = orden.estado_actual;
-    const cambioEstado = estadoAnterior !== estado_actual;
+    const estadoPermitido = esAdmin ? estado_actual : estadoAnterior;
+    const cambioEstado = estadoAnterior !== estadoPermitido;
 
     await orden.update(
       {
@@ -452,7 +504,7 @@ if (req.files && req.files.length) {
         solicitante,
         correo_solicitante,
         prioridad,
-        estado_actual,
+        estado_actual: estadoPermitido,
         descripcion: descripcion || null,
         id_responsable: id_responsable
           ? Number(id_responsable)
@@ -481,7 +533,7 @@ if (req.files && req.files.length) {
       await db.EstadoHistorial.create(
         {
           num_orden: numOrden,
-          estado_actual,
+          estado_actual: estadoPermitido,
           fecha_cambio: new Date(),
           id_usuario_cambio: req.session.user.id_usuario,
           nota: `Estado cambiado de "${estadoAnterior}" a "${estado_actual}" desde la edición de la orden.`,

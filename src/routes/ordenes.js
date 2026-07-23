@@ -10,6 +10,7 @@ const uploadOT = require("../middlewares/uploadOT");
 
 // Crear OT (Operario + Admin)
 router.get("/ordenes/nueva", authMiddleware, soloRoles("operario", "admin"), ordenesController.create);
+router.get("/api/ordenes/verificar-tramite", authMiddleware, soloRoles("operario", "admin"), ordenesController.verificarTramite);
 router.post("/ordenes", authMiddleware, soloRoles("operario", "admin"),uploadOT.array("archivos", 5), ordenesController.store);
 
 // Ver listado y detalle (cualquiera logueado)
@@ -20,17 +21,15 @@ router.get("/ordenes/:id", authMiddleware, ordenesController.show);
 router.post("/ordenes/:id/estado", authMiddleware, soloRoles("responsable", "admin"), otAbierta, soloResponsableDeOT, ordenesController.updateEstado);
 router.get("/ordenes/:id/editar",
   authMiddleware,
-  soloRoles("responsable", "admin"),
+  soloRoles("operario", "admin"),
   otAbierta,
-  soloResponsableDeOT,
   ordenesController.edit
 );
 
 router.post("/ordenes/:id/editar",
   authMiddleware,
-  soloRoles("responsable", "admin"),
+  soloRoles("operario", "admin"),
   otAbierta,
-  soloResponsableDeOT,
   uploadOT.array("archivos", 5),
   ordenesController.update
 );
@@ -38,13 +37,13 @@ router.post("/ordenes/:id/editar",
 router.post(
   "/ordenes/:id/eliminar",
   authMiddleware,
-  soloRoles("admin"),
+  soloRoles("operario", "admin"),
   ordenesController.destroy
 );
 router.post(
   "/ordenes/archivos/:idArchivo/eliminar",
   authMiddleware,
-  soloRoles("responsable", "admin"),
+  soloRoles("operario", "admin"),
   ordenesController.destroyArchivo,
 );
 module.exports = router;

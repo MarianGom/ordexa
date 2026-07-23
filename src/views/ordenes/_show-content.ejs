@@ -1,7 +1,8 @@
 <div class="stack-6" id="otPage" data-num-orden="<%= orden.num_orden %>">
 
   <% const rol = Number(user?.id_rol ?? user?.rol); %>
-  <% const canManage = rol === 1 || (rol === 3 && Number(orden.id_responsable) === Number(user?.id_usuario)); %>
+  <% const canEditOrder = rol === 1 || rol === 2; %>
+  <% const canExecute = rol === 1 || (rol === 3 && Number(orden.id_responsable) === Number(user?.id_usuario)); %>
 
   <div class="row-between">
     <div>
@@ -15,7 +16,7 @@
     <div class="row gap-2">
       <a href="/ordenes" class="btn btn-outline">← Volver</a>
 
-      <% if (canManage) { %>
+      <% if (canEditOrder) { %>
         <a href="/ordenes/<%= orden.num_orden %>/editar" class="btn btn-primary">✏ Editar</a>
       <% } %>
     </div>
@@ -49,7 +50,7 @@
     <div class="card__header row-between">
       <h3 class="card__title">Tarea de la orden</h3>
 
-      <% if (canManage && (!tareas || !tareas.length)) { %>
+      <% if (canExecute && (!tareas || !tareas.length)) { %>
         <button class="btn btn-primary" type="button" id="btnNuevaTarea">＋ Agregar tarea</button>
       <% } %>
     </div>
@@ -84,7 +85,7 @@
                   </td>
 
                   <td class="right">
-                    <% if (canManage) { %>
+                    <% if (canExecute) { %>
                       <button
                         class="btn btn-outline btn-sm"
                         type="button"
@@ -107,6 +108,39 @@
       </div>
     </div>
   </div>
+
+  <% if (canExecute && !["Finalizado", "Cancelado"].includes(orden.estado_actual)) { %>
+    <div class="card card--shadow-sm">
+      <div class="card__header">
+        <h3 class="card__title">Actualizar estado</h3>
+      </div>
+      <div class="card__content">
+        <form method="POST" action="/ordenes/<%= orden.num_orden %>/estado" class="filters">
+          <div class="filters__row">
+            <label class="field">
+              <span class="label">Nuevo estado</span>
+              <select class="select" name="estado" required>
+                <% [
+                  "En espera", "En evaluación", "En ejecución",
+                  "Espera de materiales", "Retrasado", "Pausado",
+                  "Finalizado", "Cancelado", "Fuera de término"
+                ].forEach(estado => { %>
+                  <option value="<%= estado %>" <%= orden.estado_actual === estado ? "selected" : "" %>><%= estado %></option>
+                <% }) %>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Observación</span>
+              <input class="input" name="comentario" maxlength="255" placeholder="Motivo o detalle del cambio">
+            </label>
+            <div class="filters__actions">
+              <button class="btn btn-primary" type="submit">Actualizar estado</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  <% } %>
 
   <!-- Historial -->
   <div class="card card--shadow-sm">

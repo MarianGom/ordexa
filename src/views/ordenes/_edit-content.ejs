@@ -161,6 +161,7 @@
                 Estado
               </label>
 
+              <% if (Number(user?.id_rol ?? user?.rol) === 1) { %>
               <select
                 class="select"
                 id="estado_actual"
@@ -188,6 +189,11 @@
 
                 <% }) %>
               </select>
+              <% } else { %>
+                <input type="hidden" name="estado_actual" value="<%= values.estado_actual %>">
+                <input class="input" value="<%= values.estado_actual %>" readonly>
+                <p class="help">El estado es actualizado por el Responsable asignado.</p>
+              <% } %>
             </div>
 
             <div class="field">

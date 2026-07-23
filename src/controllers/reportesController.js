@@ -53,11 +53,17 @@ const reportesController = {
       };
 
       const where = { activa: true };
+      if (rol === 3) {
+        where.id_responsable = Number(req.session.user.id_usuario);
+      }
       let include = [includeResponsable];
       let order = [["num_orden", "ASC"]];
 
       if (tab === "estado" && filtros.estado !== "all") {
         where.estado_actual = filtros.estado;
+      }
+      if (tab === "estado") {
+        order = [["id_responsable", "ASC"], ["num_orden", "ASC"]];
       }
 
       if (tab === "fechas") {
@@ -66,7 +72,7 @@ const reportesController = {
           if (filtros.desde) where.fecha_carga[Op.gte] = filtros.desde;
           if (filtros.hasta) where.fecha_carga[Op.lte] = filtros.hasta;
         }
-        order = [["fecha_carga", "ASC"], ["num_orden", "ASC"]];
+        order = [["id_responsable", "ASC"], ["fecha_carga", "ASC"], ["num_orden", "ASC"]];
       }
 
       if (tab === "responsable") {

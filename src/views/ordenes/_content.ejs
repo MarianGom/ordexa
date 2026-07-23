@@ -2,7 +2,8 @@
     <%
       const roleId = Number(user?.id_rol ?? user?.rol);
       const canCreateOrder = roleId === 1 || roleId === 2;
-      const canDeleteOrder = roleId === 1;
+      const canEditOrder = roleId === 1 || roleId === 2;
+      const canDeleteOrder = roleId === 1 || roleId === 2;
     %>
 
     <!-- Header -->
@@ -169,7 +170,7 @@
 
                                         <div class="menu v0-menu is-hidden" data-menu>
                                             <a class="menu__item" href="/ordenes/<%= o.num_orden %>">👁 Ver Detalles</a>
-                                            <% if (roleId === 1 || (roleId === 3 && Number(o.id_responsable) === Number(user.id_usuario))) { %>
+                                            <% if (canEditOrder) { %>
                                               <a class="menu__item" href="/ordenes/<%= o.num_orden %>/editar">✏ Editar</a>
                                             <% } %>
                                             <% if (canDeleteOrder) { %>
@@ -478,7 +479,8 @@ function openModal() {
       body.innerHTML = "";
       if (form) {
         body.appendChild(form);
-        initDropzone(); // ✅ engancha eventos cuando ya existe el form
+        initDropzone();
+        window.initVerificacionTramite?.(body);
       } else {
         body.innerHTML = "<p>No se encontró el formulario.</p>";
       }

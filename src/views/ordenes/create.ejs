@@ -9,8 +9,9 @@
     <div class="grid-2">
       <div class="field">
         <label class="label">Número de Trámite <span class="req">*</span></label>
-        <input class="input" name="num_tramite" required placeholder="Ej: 2025-001"
-          value="<%= values.num_tramite || '' %>">
+        <input class="input" id="num_tramite" name="num_tramite" required placeholder="Ej: 2025-001"
+          value="<%= values.num_tramite || '' %>" aria-describedby="tramite-status">
+        <p class="field-status" id="tramite-status" aria-live="polite"></p>
       </div>
 
       <div class="field">
@@ -116,6 +117,76 @@
 
     <div class="otform__actions">
     <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
-    <button class="btn btn-primary" type="submit">Guardar Orden</button>
+    <button class="btn btn-primary" id="btnGuardarOrden" type="submit">Guardar Orden</button>
   </div>
 </form>
+
+<script>
+(() => {
+  const input = document.getElementById("num_tramite");
+  const status = document.getElementById("tramite-status");
+  const submit = document.getElementById("btnGuardarOrden");
+  const form = input?.form;
+  input.dataset.verificacionActiva = "true";
+  let timer;
+  let ultimaConsulta = 0;
+  let tramiteDuplicado = false;
+
+  const mostrar = (mensaje, tipo = "") => {
+    status.textContent = mensaje;
+    status.className = `field-status ${tipo ? `field-status--${tipo}` : ""}`;
+    input.classList.toggle("input--error", tipo === "error");
+    input.classList.toggle("input--success", tipo === "success");
+  };
+
+  const verificar = async () => {
+    const numero = input.value.trim();
+    const consulta = ++ultimaConsulta;
+    tramiteDuplicado = false;
+    submit.disabled = false;
+
+    if (!numero) {
+      mostrar("");
+      return;
+    }
+
+    mostrar("Verificando número de trámite…");
+    try {
+      const response = await fetch(`/api/ordenes/verificar-tramite?num_tramite=${encodeURIComponent(numero)}`);
+      if (!response.ok) throw new Error("No se pudo verificar");
+      const resultado = await response.json();
+      if (consulta !== ultimaConsulta) return;
+
+      tramiteDuplicado = resultado.existe;
+      submit.disabled = tramiteDuplicado;
+      mostrar(
+        tramiteDuplicado
+          ? `Este trámite ya está registrado en la OT #${resultado.num_orden}.`
+          : "Número de trámite disponible.",
+        tramiteDuplicado ? "error" : "success",
+      );
+    } catch {
+      if (consulta !== ultimaConsulta) return;
+      mostrar("No se pudo verificar ahora; se comprobará al guardar.", "warning");
+    }
+  };
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    mostrar("");
+    tramiteDuplicado = false;
+    submit.disabled = false;
+    timer = setTimeout(verificar, 500);
+  });
+  input.addEventListener("blur", () => {
+    clearTimeout(timer);
+    verificar();
+  });
+  form.addEventListener("submit", (event) => {
+    if (tramiteDuplicado) {
+      event.preventDefault();
+      input.focus();
+    }
+  });
+})();
+</script>

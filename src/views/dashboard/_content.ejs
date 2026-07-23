@@ -326,7 +326,8 @@ function openModal() {
       body.innerHTML = "";
       if (form) {
         body.appendChild(form);
-        initDropzone(); // ✅ engancha eventos cuando ya existe el form
+        initDropzone();
+        window.initVerificacionTramite?.(body);
       } else {
         body.innerHTML = "<p>No se encontró el formulario.</p>";
       }

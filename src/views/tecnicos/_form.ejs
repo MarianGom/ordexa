@@ -1,0 +1,43 @@
+<section class="stack-6">
+  <div class="row-between">
+    <div>
+      <h1 class="h1"><%= mode === "create" ? "Nuevo Técnico" : "Editar Técnico" %></h1>
+      <p class="sub">Datos de identificación y contacto del técnico</p>
+    </div>
+    <a class="btn btn-outline" href="/tecnicos">← Volver</a>
+  </div>
+
+  <% if (error) { %><div class="alert alert--error"><%= error %></div><% } %>
+
+  <form class="card user-form" method="POST" action="<%= action %>">
+    <div class="card__header"><h2 class="card__title">Información del técnico</h2></div>
+    <div class="card__content">
+      <fieldset class="form-section">
+        <legend>Datos personales</legend>
+        <div class="form-grid">
+          <label class="field"><span>Nombre *</span>
+            <input class="input" name="nombre" value="<%= values.nombre || '' %>" required maxlength="80">
+          </label>
+          <label class="field"><span>Apellido *</span>
+            <input class="input" name="apellido" value="<%= values.apellido || '' %>" required maxlength="80">
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="form-section">
+        <legend>Contacto</legend>
+        <div class="form-grid">
+          <label class="field"><span>Correo electrónico *</span>
+            <input class="input" type="email" name="correo" value="<%= values.correo || '' %>" required maxlength="180">
+          </label>
+          <label class="field"><span>Teléfono</span>
+            <input class="input" name="telefono" value="<%= values.telefono || '' %>" maxlength="30" placeholder="Ej: 3814123456">
+          </label>
+        </div>
+      </fieldset>
+    </div>
+    <div class="form-actions">
+      <a class="btn btn-outline" href="/tecnicos">Cancelar</a>
+      <button class="btn btn-primary" type="submit"><%= mode === "create" ? "Guardar técnico" : "Guardar cambios" %></button>
+    </div>
+  </form>
+</section>
