@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/login.css">
+  <title>ORDEXA | Consultar OT</title>
+</head>
+<body>
+  <main class="login">
+    <section class="login__brand">
+      <div class="brand">
+        <img src="/img/logo_nombre.png" alt="ORDEXA" class="brand__logo">
+        <p class="brand__subtitle">Sistema de Gestión de Órdenes de Trabajo<br>Universitario</p>
+        <p class="brand__footer">Facultad de Ciencias Exactas y Tecnologías</p>
+      </div>
+    </section>
+
+    <section class="login__form">
+      <div class="card">
+        <header class="card__header">
+          <h1 class="card__title">Consultar una orden</h1>
+          <p class="card__desc">Ingresá el número de orden o el número de trámite.</p>
+        </header>
+        <form action="/consulta" method="GET" class="form">
+          <div class="field">
+            <label for="q">Número de orden o trámite</label>
+            <div class="input"><input id="q" name="q" type="text" value="<%= q %>" required autocomplete="off"></div>
+          </div>
+          <button class="btn" type="submit">Buscar</button>
+        </form>
+        <% if (notFound) { %><div class="alert">No se encontró una orden activa con ese número.</div><% } %>
+        <% if (orden) { %>
+          <div style="margin-top:1.5rem">
+            <p><strong>Orden:</strong> #<%= orden.num_orden %></p>
+            <p><strong>Trámite:</strong> <%= orden.num_tramite %> - <%= orden.nom_tramite %></p>
+            <p><strong>Estado:</strong> <%= orden.estado_actual %></p>
+            <p><strong>Prioridad:</strong> <%= orden.prioridad %></p>
+            <p><strong>Fecha de carga:</strong> <%= orden.fecha_carga %></p>
+            <% if (orden.descripcion) { %><p><strong>Descripción:</strong> <%= orden.descripcion %></p><% } %>
+          </div>
+        <% } %>
+        <div class="card__bottom"><a class="link" href="/login">Volver al inicio de sesión</a></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
