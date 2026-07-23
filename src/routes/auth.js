@@ -4,6 +4,10 @@ const authController = require("../controllers/authController");
 
 router.get("/login", authController.loginView);
 router.post("/login", authController.loginProcess);
+router.get("/recuperar-password", authController.forgotPasswordView);
+router.post("/recuperar-password", authController.forgotPasswordProcess);
+router.get("/restablecer-password/:token", authController.resetPasswordView);
+router.post("/restablecer-password/:token", authController.resetPasswordProcess);
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {

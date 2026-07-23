@@ -1,88 +1,44 @@
-<section>
-  <div class="page-header">
-    <div>
-      <h1>Reportes de órdenes</h1>
-      <p>Consultas habilitadas según tu rol.</p>
+<div class="stack-6">
+  <div><h1 class="h1">Reportes</h1><p class="sub">Generá informes de órdenes de trabajo según distintos criterios</p></div>
+
+  <% const labels = { estado:"Por Estado", fechas:"Por Período", responsable:"Por Responsable", prioridad:"Por Prioridad", tecnico:"Por Técnico" }; %>
+  <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);flex-wrap:wrap">
+    <% tabsPermitidos.forEach(nombre => { %>
+      <a href="/reportes?tab=<%= nombre %>" style="padding:10px 20px;font-size:13px;font-weight:600;text-decoration:none;border-radius:6px 6px 0 0;border:1px solid <%= tab === nombre ? 'var(--border)' : 'transparent' %>;border-bottom:none;margin-bottom:-2px;color:<%= tab === nombre ? 'var(--primary)' : 'var(--muted)' %>;background:<%= tab === nombre ? 'var(--card)' : 'transparent' %>"><%= labels[nombre] %></a>
+    <% }) %>
+  </div>
+
+  <div class="card card--shadow-sm">
+    <div class="card__header"><h3 class="card__title">OT <%= labels[tab].toLowerCase() %></h3></div>
+    <div class="card__content">
+      <form method="GET" action="/reportes" class="filters">
+        <input type="hidden" name="tab" value="<%= tab %>">
+        <div class="filters__row">
+          <% if (tab === "estado") { %><div class="field"><label>Estado</label><select class="select" name="estado"><option value="">-- elegir estado --</option><option value="all" <%= filtros.estado === "all" ? "selected" : "" %>>Todos los estados</option><% estados.forEach(v => { %><option value="<%= v %>" <%= filtros.estado === v ? "selected" : "" %>><%= v %></option><% }) %></select></div><% } %>
+          <% if (tab === "fechas") { %><div class="field"><label>Desde</label><input class="input-text" type="date" name="desde" value="<%= filtros.desde %>"></div><div class="field"><label>Hasta</label><input class="input-text" type="date" name="hasta" value="<%= filtros.hasta %>"></div><% } %>
+          <% if (tab === "responsable") { %><div class="field"><label>Responsable</label><select class="select" name="id_responsable"><option value="">-- elegir responsable --</option><option value="all">Todos</option><% responsables.forEach(p => { %><option value="<%= p.id_usuario %>" <%= filtros.id_responsable == p.id_usuario ? "selected" : "" %>><%= p.apellido %>, <%= p.nombre %></option><% }) %></select></div><% } %>
+          <% if (tab === "prioridad") { %><div class="field"><label>Prioridad</label><select class="select" name="prioridad"><option value="">-- elegir prioridad --</option><option value="all">Todas</option><% ["Alta","Media","Baja"].forEach(v => { %><option value="<%= v %>" <%= filtros.prioridad === v ? "selected" : "" %>><%= v %></option><% }) %></select></div><% } %>
+          <% if (tab === "tecnico") { %><div class="field"><label>Técnico</label><select class="select" name="id_tecnico"><option value="">-- elegir técnico --</option><option value="all">Todos</option><% tecnicos.forEach(p => { %><option value="<%= p.id_tecnico %>" <%= filtros.id_tecnico == p.id_tecnico ? "selected" : "" %>><%= p.apellido %>, <%= p.nombre %></option><% }) %></select></div><% } %>
+          <div class="field" style="align-self:flex-end"><button class="btn btn-primary" type="submit">Generar reporte</button></div>
+        </div>
+      </form>
     </div>
   </div>
 
-  <nav style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-    <% const etiquetas = { estado: "Por estado", fechas: "Por fechas", responsable: "Por responsable", prioridad: "Por prioridad", tecnico: "Por técnico" }; %>
-    <% tabsPermitidos.forEach(nombre => { %>
-      <a class="btn <%= tab === nombre ? 'btn-primary' : 'btn-ghost' %>" href="/reportes?tab=<%= nombre %>"><%= etiquetas[nombre] %></a>
-    <% }) %>
-  </nav>
-
-  <form method="GET" action="/reportes" class="card" style="margin-bottom:1rem">
-    <input type="hidden" name="tab" value="<%= tab %>">
-    <div style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap">
-      <% if (tab === "estado") { %>
-        <label>Estado
-          <select name="estado">
-            <option value="all">Todos</option>
-            <% estados.forEach(estado => { %><option value="<%= estado %>" <%= filtros.estado === estado ? "selected" : "" %>><%= estado %></option><% }) %>
-          </select>
-        </label>
-      <% } %>
-      <% if (tab === "fechas") { %>
-        <label>Desde <input type="date" name="desde" value="<%= filtros.desde %>"></label>
-        <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta %>"></label>
-      <% } %>
-      <% if (tab === "responsable") { %>
-        <label>Responsable
-          <select name="id_responsable">
-            <option value="all">Todos</option>
-            <% responsables.forEach(persona => { %><option value="<%= persona.id_usuario %>" <%= filtros.id_responsable == persona.id_usuario ? "selected" : "" %>><%= persona.apellido %>, <%= persona.nombre %></option><% }) %>
-          </select>
-        </label>
-      <% } %>
-      <% if (tab === "prioridad") { %>
-        <label>Prioridad
-          <select name="prioridad">
-            <option value="all">Todas</option>
-            <% ["Alta", "Media", "Baja"].forEach(valor => { %><option value="<%= valor %>" <%= filtros.prioridad === valor ? "selected" : "" %>><%= valor %></option><% }) %>
-          </select>
-        </label>
-      <% } %>
-      <% if (tab === "tecnico") { %>
-        <label>Técnico
-          <select name="id_tecnico">
-            <option value="all">Todos</option>
-            <% tecnicos.forEach(persona => { %><option value="<%= persona.id_tecnico %>" <%= filtros.id_tecnico == persona.id_tecnico ? "selected" : "" %>><%= persona.apellido %>, <%= persona.nombre %></option><% }) %>
-          </select>
-        </label>
-      <% } %>
-      <button class="btn btn-primary" type="submit">Generar reporte</button>
-    </div>
-  </form>
-
-  <div class="card" style="overflow:auto">
-    <table class="table">
-      <thead><tr>
-        <% if (tab === "tecnico") { %><th>Técnico</th><% } %>
-        <% if (["estado", "fechas", "responsable"].includes(tab)) { %><th>Responsable</th><% } %>
-        <th>OT</th><th>Trámite</th><th>Estado</th><th>Prioridad</th>
-        <% if (["prioridad", "tecnico"].includes(tab)) { %><th>Tarea</th><th>Recursos</th><% } %>
-      </tr></thead>
+  <% if (mostrarResultados) { %>
+  <div class="card card--shadow-sm">
+    <div class="card__header"><h3 class="card__title">Resultados <span style="font-weight:400;font-size:14px;color:var(--muted);margin-left:8px"><%= ordenes.length %> órdenes</span></h3></div>
+    <div class="card__content card__content--noPad"><div class="tablewrap"><table class="table">
+      <thead><tr><% if (tab === "tecnico") { %><th>Técnico</th><% } %><% if (["estado","fechas","responsable"].includes(tab)) { %><th>Responsable</th><% } %><th># Orden</th><th>N° Trámite</th><th>Estado</th><th>Prioridad</th><% if (["prioridad","tecnico"].includes(tab)) { %><th>Tarea</th><th>Recursos</th><% } %></tr></thead>
       <tbody>
-        <% if (!ordenes.length) { %><tr><td colspan="8">No se encontraron órdenes.</td></tr><% } %>
-        <% ordenes.forEach(orden => { %>
-          <% if (tab === "tecnico" && orden.tareas?.length) { %>
-            <% orden.tareas.forEach(tarea => { %><tr>
-              <td><%= tarea.tecnico ? `${tarea.tecnico.apellido}, ${tarea.tecnico.nombre}` : "Sin asignar" %></td>
-              <td>#<%= orden.num_orden %></td><td><%= orden.num_tramite %></td><td><%= orden.estado_actual %></td><td><%= orden.prioridad %></td>
-              <td><%= tarea.descripcion || "-" %></td><td><%= tarea.materiales || "-" %><%= tarea.tiempo_necesario ? ` / ${tarea.tiempo_necesario} días` : "" %></td>
-            </tr><% }) %>
-          <% } else if (tab !== "tecnico") { %><tr>
-            <% if (["estado", "fechas", "responsable"].includes(tab)) { %><td><%= orden.responsable ? `${orden.responsable.apellido}, ${orden.responsable.nombre}` : "Sin asignar" %></td><% } %>
-            <td>#<%= orden.num_orden %></td><td><%= orden.num_tramite %></td><td><%= orden.estado_actual %></td><td><%= orden.prioridad %></td>
-            <% if (tab === "prioridad") { %>
-              <td><%= (orden.tareas || []).map(t => t.descripcion).filter(Boolean).join("; ") || "-" %></td>
-              <td><%= (orden.tareas || []).map(t => [t.materiales, t.tiempo_necesario ? `${t.tiempo_necesario} días` : null].filter(Boolean).join(" / ")).filter(Boolean).join("; ") || "-" %></td>
-            <% } %>
-          </tr><% } %>
+        <% if (!ordenes.length) { %><tr><td colspan="8" class="empty">No se encontraron órdenes</td></tr><% } %>
+        <% ordenes.forEach(ot => { %>
+          <% if (tab === "tecnico") { (ot.tareas || []).forEach(t => { %><tr><td><%= t.tecnico ? `${t.tecnico.apellido}, ${t.tecnico.nombre}` : "Sin asignar" %></td><td><strong>#<%= ot.num_orden %></strong></td><td><%= ot.num_tramite %></td><td><span class="badge badge--st-gray"><%= ot.estado_actual %></span></td><td><%= ot.prioridad %></td><td><%= t.descripcion || "—" %></td><td><%= t.materiales || "—" %><%= t.tiempo_necesario ? ` / ${t.tiempo_necesario} días` : "" %></td></tr><% }); } else { %>
+            <tr><% if (["estado","fechas","responsable"].includes(tab)) { %><td><%= ot.responsable ? `${ot.responsable.apellido}, ${ot.responsable.nombre}` : "Sin asignar" %></td><% } %><td><strong>#<%= ot.num_orden %></strong></td><td><%= ot.num_tramite %></td><td><span class="badge badge--st-gray"><%= ot.estado_actual %></span></td><td><%= ot.prioridad %></td><% if (tab === "prioridad") { %><td><%= (ot.tareas || []).map(t => t.descripcion).filter(Boolean).join("; ") || "—" %></td><td><%= (ot.tareas || []).map(t => t.materiales).filter(Boolean).join("; ") || "—" %></td><% } %></tr>
+          <% } %>
         <% }) %>
       </tbody>
-    </table>
+    </table></div></div>
   </div>
-</section>
+  <% } %>
+</div>

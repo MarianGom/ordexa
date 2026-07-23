@@ -51,6 +51,12 @@ const reportesController = {
         prioridad: String(req.query.prioridad || "all"),
         id_tecnico: String(req.query.id_tecnico || "all"),
       };
+      const mostrarResultados = tab === "fechas"
+        ? Boolean(req.query.desde || req.query.hasta)
+        : Object.prototype.hasOwnProperty.call(req.query, {
+            estado: "estado", responsable: "id_responsable",
+            prioridad: "prioridad", tecnico: "id_tecnico",
+          }[tab]);
 
       const where = { activa: true };
       let include = [includeResponsable];
@@ -109,7 +115,8 @@ const reportesController = {
 
       return res.render("reportes/index", {
         title: "Reportes", user: req.session.user, currentPath: "/reportes",
-        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos, estados: ESTADOS,
+        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos,
+        estados: ESTADOS, mostrarResultados,
       });
     } catch (error) {
       console.error("Error generando reporte:", error);
