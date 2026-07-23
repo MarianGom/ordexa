@@ -19,9 +19,9 @@ const includeResponsable = {
   attributes: ["id_usuario", "nombre", "apellido"],
 };
 
-const includeTareas = {
+const includeTarea = {
   model: db.Tarea,
-  as: "tareas",
+  as: "tarea",
   required: false,
   attributes: ["id_tarea", "descripcion", "materiales", "tiempo_necesario", "id_tecnico"],
   include: [{
@@ -51,12 +51,6 @@ const reportesController = {
         prioridad: String(req.query.prioridad || "all"),
         id_tecnico: String(req.query.id_tecnico || "all"),
       };
-      const mostrarResultados = tab === "fechas"
-        ? Boolean(req.query.desde || req.query.hasta)
-        : Object.prototype.hasOwnProperty.call(req.query, {
-            estado: "estado", responsable: "id_responsable",
-            prioridad: "prioridad", tecnico: "id_tecnico",
-          }[tab]);
 
       const where = { activa: true };
       let include = [includeResponsable];
@@ -84,7 +78,7 @@ const reportesController = {
 
       if (tab === "prioridad") {
         if (filtros.prioridad !== "all") where.prioridad = filtros.prioridad;
-        include = [includeResponsable, includeTareas];
+        include = [includeResponsable, includeTarea];
         order = [
           [db.Sequelize.literal("CASE prioridad WHEN 'Alta' THEN 1 WHEN 'Media' THEN 2 WHEN 'Baja' THEN 3 ELSE 4 END"), "ASC"],
           ["num_orden", "ASC"],
@@ -93,7 +87,7 @@ const reportesController = {
 
       if (tab === "tecnico") {
         include = [includeResponsable, {
-          ...includeTareas,
+          ...includeTarea,
           required: filtros.id_tecnico !== "all",
           where: filtros.id_tecnico === "all" ? undefined : { id_tecnico: Number(filtros.id_tecnico) },
         }];
@@ -115,8 +109,7 @@ const reportesController = {
 
       return res.render("reportes/index", {
         title: "Reportes", user: req.session.user, currentPath: "/reportes",
-        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos,
-        estados: ESTADOS, mostrarResultados,
+        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos, estados: ESTADOS,
       });
     } catch (error) {
       console.error("Error generando reporte:", error);
