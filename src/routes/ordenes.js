@@ -28,6 +28,7 @@ router.post("/ordenes/:id/editar",
   authMiddleware,
   soloRoles("responsable", "admin"),
   otAbierta,
+  uploadOT.array("archivos", 5),
   ordenesController.update
 );
 
@@ -36,5 +37,11 @@ router.post(
   authMiddleware,
   soloRoles("admin"),
   ordenesController.destroy
+);
+router.post(
+  "/ordenes/archivos/:idArchivo/eliminar",
+  authMiddleware,
+  soloRoles("responsable", "admin"),
+  ordenesController.destroyArchivo,
 );
 module.exports = router;

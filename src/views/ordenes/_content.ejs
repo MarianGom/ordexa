@@ -287,52 +287,170 @@ const body = document.getElementById("modalBody");
 const btnNueva = document.getElementById("btnNuevaOT");
 
 function initDropzone() {
-  const input = document.getElementById("archivos");
+  const inputArchivos = document.getElementById("archivos");
+  const fileList = document.getElementById("filelist");
   const dropzone = document.getElementById("dropzone");
-  const filelist = document.getElementById("filelist");
 
-  if (!input || !dropzone || !filelist) return;
+  if (!inputArchivos || !fileList) {
+    return;
+  }
 
-  function renderFiles(files) {
-    filelist.innerHTML = "";
-    if (!files || !files.length) return;
+  let archivosSeleccionados = [];
 
-    Array.from(files).forEach(f => {
-      const el = document.createElement("div");
-      el.className = "filechip";
-      el.innerHTML = `
-        <div class="filechip__name">${f.name}</div>
-        <div class="filechip__meta">${Math.round(f.size / 1024)} KB</div>
-      `;
-      filelist.appendChild(el);
+  inputArchivos.addEventListener("change", () => {
+    const nuevosArchivos = Array.from(inputArchivos.files);
+
+    archivosSeleccionados = [
+      ...archivosSeleccionados,
+      ...nuevosArchivos,
+    ];
+
+    // Evita duplicados por nombre, tamaño y última modificación
+    archivosSeleccionados = archivosSeleccionados.filter(
+      (archivo, indice, lista) =>
+        indice ===
+        lista.findIndex(
+          (otro) =>
+            otro.name === archivo.name &&
+            otro.size === archivo.size &&
+            otro.lastModified === archivo.lastModified
+        )
+    );
+
+    actualizarInput();
+    renderizarLista();
+  });
+
+  function renderizarLista() {
+    fileList.innerHTML = "";
+
+    if (!archivosSeleccionados.length) {
+      return;
+    }
+
+    archivosSeleccionados.forEach((archivo, indice) => {
+      const item = document.createElement("div");
+
+      item.classList.add(
+        "filelist__item",
+        "row-between"
+      );
+
+      const info = document.createElement("div");
+
+      const nombre = document.createElement("div");
+      nombre.classList.add("strong");
+      nombre.textContent = archivo.name;
+
+      const tamaño = document.createElement("div");
+      tamaño.classList.add("muted");
+      tamaño.textContent = formatearTamaño(archivo.size);
+
+      info.appendChild(nombre);
+      info.appendChild(tamaño);
+
+      const botonQuitar = document.createElement("button");
+
+      botonQuitar.type = "button";
+
+      botonQuitar.classList.add(
+        "btn",
+        "btn-outline",
+        "btn-sm"
+      );
+
+      botonQuitar.textContent = "Quitar";
+
+      botonQuitar.addEventListener("click", () => {
+        archivosSeleccionados.splice(indice, 1);
+
+        actualizarInput();
+        renderizarLista();
+      });
+
+      item.appendChild(info);
+      item.appendChild(botonQuitar);
+
+      fileList.appendChild(item);
     });
   }
 
-  input.addEventListener("change", () => renderFiles(input.files));
+  function actualizarInput() {
+    const dataTransfer = new DataTransfer();
 
-  ["dragenter","dragover"].forEach(evt => {
-    dropzone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.add("is-dragover");
+    archivosSeleccionados.forEach((archivo) => {
+      dataTransfer.items.add(archivo);
     });
-  });
 
-  ["dragleave","drop"].forEach(evt => {
-    dropzone.addEventListener(evt, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove("is-dragover");
-    });
-  });
+    inputArchivos.files = dataTransfer.files;
+  }
 
-  dropzone.addEventListener("drop", (e) => {
-    const files = e.dataTransfer.files;
-    if (files && files.length) {
-      input.files = files;
-      renderFiles(files);
+  function formatearTamaño(bytes) {
+    if (bytes === 0) {
+      return "0 KB";
     }
-  });
+
+    const kilobytes = bytes / 1024;
+
+    if (kilobytes < 1024) {
+      return `${kilobytes.toFixed(1)} KB`;
+    }
+
+    const megabytes = kilobytes / 1024;
+
+    return `${megabytes.toFixed(1)} MB`;
+  }
+
+  /*
+   * Drag and drop.
+   * Esto conserva la funcionalidad que ya tenía Crear OT.
+   */
+  if (dropzone) {
+    ["dragenter", "dragover"].forEach((evento) => {
+      dropzone.addEventListener(evento, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        dropzone.classList.add("is-dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((evento) => {
+      dropzone.addEventListener(evento, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        dropzone.classList.remove("is-dragover");
+      });
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      const nuevosArchivos = Array.from(
+        e.dataTransfer.files
+      );
+
+      archivosSeleccionados = [
+        ...archivosSeleccionados,
+        ...nuevosArchivos,
+      ];
+
+      // Evita archivos duplicados
+      archivosSeleccionados =
+        archivosSeleccionados.filter(
+          (archivo, indice, lista) =>
+            indice ===
+            lista.findIndex(
+              (otro) =>
+                otro.name === archivo.name &&
+                otro.size === archivo.size &&
+                otro.lastModified === archivo.lastModified
+            )
+        );
+
+      actualizarInput();
+      renderizarLista();
+    });
+  }
 }
 
 function openModal() {

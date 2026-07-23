@@ -1,0 +1,549 @@
+<% if (error) { %>
+  <div class="alert alert--error">
+    <%= error %>
+  </div>
+<% } %>
+
+<div class="stack-6">
+
+  <!-- Encabezado -->
+  <div class="row-between">
+    <div>
+      <h1 class="h1">Editar Orden</h1>
+
+      <p class="sub">
+        OT #<%= orden.num_orden %> ·
+        Trámite <strong><%= orden.num_tramite %></strong>
+      </p>
+    </div>
+
+    <a
+      class="btn btn-outline"
+      href="/ordenes/<%= orden.num_orden %>"
+    >
+      ← Volver
+    </a>
+  </div>
+
+  <!-- Tarjeta principal -->
+  <div class="card card--shadow-sm">
+
+    <div class="card__header">
+      <h3 class="card__title">Datos de la orden</h3>
+    </div>
+
+    <div class="card__content">
+
+      <form
+        class="otform"
+        method="POST"
+        action="/ordenes/<%= orden.num_orden %>/editar"
+        enctype="multipart/form-data"
+      >
+
+        <!-- Información del trámite -->
+        <div class="otform__section">
+
+          <h3 class="otform__h3">
+            Información del trámite
+          </h3>
+
+          <div class="grid-2">
+
+            <div class="field">
+              <label class="label" for="num_tramite">
+                N° Trámite
+              </label>
+
+              <input
+                class="input"
+                id="num_tramite"
+                name="num_tramite"
+                type="text"
+                value="<%= values.num_tramite || '' %>"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label class="label" for="nom_tramite">
+                Nombre de Trámite
+              </label>
+
+              <input
+                class="input"
+                id="nom_tramite"
+                name="nom_tramite"
+                type="text"
+                value="<%= values.nom_tramite || '' %>"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label class="label" for="solicitante">
+                Solicitante
+              </label>
+
+              <input
+                class="input"
+                id="solicitante"
+                name="solicitante"
+                type="text"
+                value="<%= values.solicitante || '' %>"
+                required
+              >
+            </div>
+
+            <div class="field">
+              <label class="label" for="correo_solicitante">
+                Correo
+              </label>
+
+              <input
+                class="input"
+                id="correo_solicitante"
+                name="correo_solicitante"
+                type="email"
+                value="<%= values.correo_solicitante || '' %>"
+                required
+              >
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Gestión de la orden -->
+        <div class="otform__section">
+
+          <h3 class="otform__h3">
+            Gestión de la orden
+          </h3>
+
+          <div class="grid-2">
+
+            <div class="field">
+              <label class="label" for="prioridad">
+                Prioridad
+              </label>
+
+              <select
+                class="select"
+                id="prioridad"
+                name="prioridad"
+                required
+              >
+                <option
+                  value="Alta"
+                  <%= values.prioridad === "Alta" ? "selected" : "" %>
+                >
+                  Alta
+                </option>
+
+                <option
+                  value="Media"
+                  <%= values.prioridad === "Media" ? "selected" : "" %>
+                >
+                  Media
+                </option>
+
+                <option
+                  value="Baja"
+                  <%= values.prioridad === "Baja" ? "selected" : "" %>
+                >
+                  Baja
+                </option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="label" for="estado_actual">
+                Estado
+              </label>
+
+              <select
+                class="select"
+                id="estado_actual"
+                name="estado_actual"
+                required
+              >
+                <% [
+                  "En espera",
+                  "En evaluación",
+                  "En ejecución",
+                  "Espera de materiales",
+                  "Retrasado",
+                  "Pausado",
+                  "Finalizado",
+                  "Cancelado",
+                  "Fuera de término"
+                ].forEach(estado => { %>
+
+                  <option
+                    value="<%= estado %>"
+                    <%= values.estado_actual === estado ? "selected" : "" %>
+                  >
+                    <%= estado %>
+                  </option>
+
+                <% }) %>
+              </select>
+            </div>
+
+            <div class="field">
+              <label class="label" for="id_responsable">
+                Responsable
+              </label>
+
+              <select
+                class="select"
+                id="id_responsable"
+                name="id_responsable"
+              >
+                <option value="">
+                  -- Sin responsable --
+                </option>
+
+                <% if (responsables && responsables.length) { %>
+
+                  <% responsables.forEach(responsable => { %>
+
+                    <option
+                      value="<%= responsable.id_usuario %>"
+                      <%= String(values.id_responsable || "") === String(responsable.id_usuario)
+                        ? "selected"
+                        : "" %>
+                    >
+                      <%= responsable.apellido %>,
+                      <%= responsable.nombre %>
+                      (<%= responsable.correo %>)
+                    </option>
+
+                  <% }) %>
+
+                <% } %>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="field">
+            <label class="label" for="descripcion">
+              Descripción
+            </label>
+
+            <textarea
+              class="textarea"
+              id="descripcion"
+              name="descripcion"
+              rows="5"
+              placeholder="Describa los detalles de la orden..."
+            ><%= values.descripcion || "" %></textarea>
+          </div>
+
+        </div>
+
+        <!-- Archivos actuales -->
+        <div class="otform__section">
+
+          <h3 class="otform__h3">
+            Archivos adjuntos actuales
+          </h3>
+
+          <% if (orden.archivos && orden.archivos.length > 0) { %>
+
+            <div class="filelist filelist--current">
+
+              <% orden.archivos.forEach(archivo => { %>
+
+                <div class="filelist__item row-between">
+
+                  <div>
+                    <a
+                      href="<%= archivo.ruta %>"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <%= archivo.nombre %>
+                    </a>
+
+                    <% if (archivo.mime_type) { %>
+                      <div class="help">
+                        <%= archivo.mime_type %>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline btn-sm"
+                    data-eliminar-archivo="<%= archivo.id_archivo %>"
+                    data-nombre-archivo="<%= archivo.nombre %>"
+                  >
+                    Eliminar
+                  </button>
+
+                </div>
+
+              <% }) %>
+
+            </div>
+
+          <% } else { %>
+
+            <p class="help">
+              Esta orden todavía no tiene archivos adjuntos.
+            </p>
+
+          <% } %>
+
+        </div>
+
+        <!-- Agregar nuevos archivos -->
+        <div class="otform__section">
+
+          <h3 class="otform__h3">
+            Agregar nuevos archivos
+          </h3>
+
+          <div class="field">
+
+            <input
+              class="file__input"
+              id="archivos"
+              type="file"
+              name="archivos"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            >
+
+            <label
+              for="archivos"
+              class="dropzone"
+              id="dropzone"
+            >
+
+              <div class="dropzone__icon" aria-hidden="true">
+
+                <svg
+                  width="34"
+                  height="34"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="M12 3v10"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+
+                  <path
+                    d="M8 7l4-4 4 4"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  <path
+                    d="M4 14v4a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                </svg>
+
+              </div>
+
+              <div class="dropzone__text">
+
+                <div class="dropzone__title">
+                  Haga clic para seleccionar archivos
+                </div>
+
+                <div class="dropzone__sub">o arrastre y suelte aquí (Hasta 5 Archivos)
+                </div>
+
+              </div>
+
+            </label>
+
+            <!-- Vista previa de nuevos archivos -->
+            <div
+              class="filelist"
+              id="filelist"
+            ></div>
+
+          </div>
+
+        </div>
+
+        <!-- Acciones -->
+        <div class="otform__actions">
+
+          <a
+            class="btn btn-outline"
+            href="/ordenes/<%= orden.num_orden %>"
+          >
+            Cancelar
+          </a>
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+          >
+            Guardar cambios
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const inputArchivos = document.getElementById("archivos");
+    const fileList = document.getElementById("filelist");
+
+    let archivosSeleccionados = [];
+
+    inputArchivos?.addEventListener("change", () => {
+      const nuevosArchivos = Array.from(inputArchivos.files);
+
+      archivosSeleccionados = [
+        ...archivosSeleccionados,
+        ...nuevosArchivos,
+      ];
+
+      // Evita duplicados por nombre, tamaño y última modificación
+      archivosSeleccionados = archivosSeleccionados.filter(
+        (archivo, indice, lista) =>
+          indice ===
+          lista.findIndex(
+            (otro) =>
+              otro.name === archivo.name &&
+              otro.size === archivo.size &&
+              otro.lastModified === archivo.lastModified
+          )
+      );
+
+      actualizarInput();
+      renderizarLista();
+    });
+
+    function renderizarLista() {
+      fileList.innerHTML = "";
+
+      if (!archivosSeleccionados.length) {
+        return;
+      }
+
+      archivosSeleccionados.forEach((archivo, indice) => {
+        const item = document.createElement("div");
+        item.classList.add("filelist__item", "row-between");
+
+        const info = document.createElement("div");
+
+        const nombre = document.createElement("div");
+        nombre.classList.add("strong");
+        nombre.textContent = archivo.name;
+
+        const tamaño = document.createElement("div");
+        tamaño.classList.add("muted");
+        tamaño.textContent = formatearTamaño(archivo.size);
+
+        info.appendChild(nombre);
+        info.appendChild(tamaño);
+
+        const botonQuitar = document.createElement("button");
+        botonQuitar.type = "button";
+        botonQuitar.classList.add(
+          "btn",
+          "btn-outline",
+          "btn-sm"
+        );
+        botonQuitar.textContent = "Quitar";
+
+        botonQuitar.addEventListener("click", () => {
+          archivosSeleccionados.splice(indice, 1);
+
+          actualizarInput();
+          renderizarLista();
+        });
+
+        item.appendChild(info);
+        item.appendChild(botonQuitar);
+
+        fileList.appendChild(item);
+      });
+    }
+
+    function actualizarInput() {
+      const dataTransfer = new DataTransfer();
+
+      archivosSeleccionados.forEach((archivo) => {
+        dataTransfer.items.add(archivo);
+      });
+
+      inputArchivos.files = dataTransfer.files;
+    }
+
+    function formatearTamaño(bytes) {
+      if (bytes === 0) {
+        return "0 KB";
+      }
+
+      const kilobytes = bytes / 1024;
+
+      if (kilobytes < 1024) {
+        return `${kilobytes.toFixed(1)} KB`;
+      }
+
+      const megabytes = kilobytes / 1024;
+
+      return `${megabytes.toFixed(1)} MB`;
+    }
+
+    // Mantener acá el código de eliminación de archivos ya guardados
+    const botonesEliminar = document.querySelectorAll(
+      "[data-eliminar-archivo]"
+    );
+
+    botonesEliminar.forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const idArchivo = boton.dataset.eliminarArchivo;
+        const nombreArchivo = boton.dataset.nombreArchivo;
+
+        if (!idArchivo) {
+          alert("No se pudo identificar el archivo.");
+          return;
+        }
+
+        const confirmado = confirm(
+          `¿Está seguro de eliminar el archivo "${nombreArchivo}"?`
+        );
+
+        if (!confirmado) {
+          return;
+        }
+
+        const formularioEliminar =
+          document.createElement("form");
+
+        formularioEliminar.method = "POST";
+        formularioEliminar.action =
+          `/ordenes/archivos/${idArchivo}/eliminar`;
+
+        formularioEliminar.style.display = "none";
+
+        document.body.appendChild(formularioEliminar);
+
+        formularioEliminar.submit();
+      });
+    });
+  });
+</script>

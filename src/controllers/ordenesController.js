@@ -1,4 +1,6 @@
 const db = require("../database/models");
+const fs = require("fs/promises");
+const path = require("path");
 
 const ITEMS_PER_PAGE = 10; // ajustá si querés 5 como v0
 const { Op } = db.Sequelize;
@@ -217,7 +219,20 @@ const ordenesController = {
         },
         { transaction: t },
       );
+// Guardar archivos adjuntos
+if (req.files && req.files.length) {
+  const archivos = req.files.map((archivo) => ({
+    num_orden: nuevaOT.num_orden,
+    nombre: archivo.originalname,
+    ruta: `/uploads/ot/${archivo.filename}`,
+    mime_type: archivo.mimetype || null,
+    subido_en: new Date(),
+  }));
 
+  await db.OrdenArchivo.bulkCreate(archivos, {
+    transaction: t,
+  });
+}
       await t.commit();
       return res.redirect(`/ordenes/${nuevaOT.num_orden}`);
     } catch (error) {
@@ -234,19 +249,7 @@ const ordenesController = {
           ["nombre", "ASC"],
         ],
       });
-      // 2) Guardar archivos adjuntos (si vinieron)
-      if (req.files && req.files.length) {
-        const rows = req.files.map((f) => ({
-          num_orden: nuevaOT.num_orden,
-          nombre: f.originalname, // tu columna: nombre
-          ruta: `/uploads/ot/${f.filename}`, // tu columna: ruta
-          mime_type: f.mimetype || null, // tu columna: mime_type
-          subido_en: new Date(), // o que lo haga defaultValue
-        }));
-
-        await db.OrdenArchivo.bulkCreate(rows, { transaction: t });
-      }
-
+     
       return res.status(500).render("ordenes/create", {
         error: "No se pudo crear la OT. Revisá consola.",
         values: req.body,
@@ -351,7 +354,15 @@ const ordenesController = {
       const numOrden = Number(req.params.id);
       if (!numOrden) return res.status(400).send("ID inválido");
 
-      const orden = await db.OrdenTrabajo.findByPk(numOrden);
+      const orden = await db.OrdenTrabajo.findByPk(numOrden, {
+  include: [
+    {
+      model: db.OrdenArchivo,
+      as: "archivos",
+      required: false,
+    },
+  ],
+});
       if (!orden) return res.status(404).send("Orden no encontrada");
 
       // mismos responsables que usás en create (por si querés cambiar responsable)
@@ -392,6 +403,7 @@ const ordenesController = {
       transaction: t,
     });
 
+
     if (!orden) {
       await t.rollback();
       return res.status(404).send("Orden no encontrada");
@@ -428,6 +440,20 @@ const ordenesController = {
         transaction: t,
       },
     );
+
+    if (req.files && req.files.length) {
+  const archivosNuevos = req.files.map((archivo) => ({
+    num_orden: numOrden,
+    nombre: archivo.originalname,
+    ruta: `/uploads/ot/${archivo.filename}`,
+    mime_type: archivo.mimetype || null,
+    subido_en: new Date(),
+  }));
+
+  await db.OrdenArchivo.bulkCreate(archivosNuevos, {
+    transaction: t,
+  });
+}
 
     if (cambioEstado) {
       await db.EstadoHistorial.create(
@@ -478,6 +504,69 @@ destroy: async (req, res) => {
   } catch (error) {
     console.error("ERROR DESACTIVANDO OT:", error);
     return res.status(500).send("No se pudo eliminar la orden.");
+  }
+},
+destroyArchivo: async (req, res) => {
+  const t = await db.sequelize.transaction();
+
+  try {
+    const idArchivo = Number(req.params.idArchivo);
+
+    if (!idArchivo) {
+      await t.rollback();
+      return res.status(400).send("ID de archivo inválido");
+    }
+
+    const archivo = await db.OrdenArchivo.findByPk(idArchivo, {
+      transaction: t,
+    });
+
+    if (!archivo) {
+      await t.rollback();
+      return res.status(404).send("Archivo no encontrado");
+    }
+
+    const numOrden = archivo.num_orden;
+
+    // La ruta guardada suele ser: /uploads/ot/nombre-archivo.pdf
+    // Quitamos la barra inicial para poder unirla con la carpeta public.
+    const rutaRelativa = archivo.ruta.replace(/^\/+/, "");
+
+    const rutaFisica = path.join(
+      __dirname,
+      "../../public",
+      rutaRelativa,
+    );
+
+    // Primero eliminamos el registro de la base
+    await archivo.destroy({
+      transaction: t,
+    });
+
+    await t.commit();
+
+    // Luego intentamos eliminar el archivo físico.
+    // Si no existe, no interrumpimos la operación.
+    try {
+      await fs.unlink(rutaFisica);
+    } catch (fileError) {
+      if (fileError.code !== "ENOENT") {
+        console.error(
+          "No se pudo eliminar el archivo físico:",
+          fileError,
+        );
+      }
+    }
+
+    return res.redirect(`/ordenes/${numOrden}`);
+  } catch (error) {
+    await t.rollback();
+
+    console.error("ERROR ELIMINANDO ARCHIVO:", error);
+
+    return res.status(500).send(
+      "No se pudo eliminar el archivo adjunto",
+    );
   }
 },
 };
