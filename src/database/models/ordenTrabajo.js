@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     OrdenTrabajo.belongsTo(models.Usuario, { foreignKey: "id_responsable", as: "responsable" });
 
     // ✅ OT tiene muchas tareas
-    OrdenTrabajo.hasMany(models.Tarea, { foreignKey: "num_orden", as: "tareas" });
+    OrdenTrabajo.hasOne(models.Tarea, { foreignKey: "num_orden", as: "tarea" });
 
     OrdenTrabajo.hasMany(models.EstadoHistorial, { foreignKey: "num_orden", as: "historial" });
     OrdenTrabajo.hasMany(models.OrdenArchivo, { foreignKey: "num_orden", as: "archivos" });

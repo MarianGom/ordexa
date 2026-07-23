@@ -4,6 +4,8 @@ const logAudit = require("../helpers/audit");
 const tareasController = {
    newForm: async (req, res) => {
   const numOrden = Number(req.params.id);
+  const tareaExistente = await db.Tarea.findOne({ where: { num_orden: numOrden } });
+  if (tareaExistente) return res.redirect(`/tareas/${tareaExistente.id_tarea}/editar`);
 
   const tecnicos = await db.Tecnico.findAll({
     where: { activo: 1 },
@@ -46,6 +48,10 @@ editForm: async (req, res) => {
     try {
       const num_orden = Number(req.params.id);
       const { descripcion, materiales, tiempo_necesario, id_tecnico } = req.body;
+      const tareaExistente = await db.Tarea.findOne({ where: { num_orden } });
+      if (tareaExistente) {
+        return res.status(409).send("Esta orden ya tiene su única tarea asociada.");
+      }
 
       if (!descripcion || descripcion.trim().length < 3) {
         return res.status(400).send("Descripción obligatoria (mín 3 caracteres).");
@@ -67,7 +73,7 @@ editForm: async (req, res) => {
             evento: "ASIGNACION_TECNICO",
             tablaAfectada: "tarea",
             idRegistro: tarea.id_tarea,
-            detalle: `Técnico ${tarea.id_tecnico} asignado a OT ${num_orden}`,
+            detalle: `Técnico ${tarea.id_tecnico} asignado a la tarea ${tarea.id_tarea}`,
             transaction,
           });
         }
@@ -128,25 +134,14 @@ editForm: async (req, res) => {
   },
 
   destroy: async (req, res) => {
-  try {
-    const id_tarea = Number(req.params.id);
-
-    const tarea = await db.Tarea.findByPk(id_tarea);
-
-    if (!tarea) {
-      return res.status(404).send("Tarea no encontrada");
-    }
-
-    const numOrden = tarea.num_orden;
-
-    await tarea.destroy();
-    req.session.flash = { type: "success", message: "Tarea eliminada correctamente." };
-    return res.redirect(`/ordenes/${numOrden}`);
-  } catch (error) {
-    console.error("Error eliminando tarea:", error);
-    return res.status(500).send(error.message);
+    const tarea = await db.Tarea.findByPk(Number(req.params.id));
+    if (!tarea) return res.status(404).send("Tarea no encontrada");
+    req.session.flash = {
+      type: "warning",
+      message: "La tarea no puede eliminarse porque toda OT debe conservar una única tarea.",
+    };
+    return res.redirect(`/ordenes/${tarea.num_orden}`);
   }
-}
 };
 
 module.exports = tareasController;

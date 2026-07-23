@@ -47,9 +47,9 @@
   <!-- Tareas -->
   <div class="card card--shadow-sm">
     <div class="card__header row-between">
-      <h3 class="card__title">Tareas</h3>
+      <h3 class="card__title">Tarea de la orden</h3>
 
-      <% if (canManage) { %>
+      <% if (canManage && (!tareas || !tareas.length)) { %>
         <button class="btn btn-primary" type="button" id="btnNuevaTarea">＋ Agregar tarea</button>
       <% } %>
     </div>
@@ -93,13 +93,6 @@
                         Editar
                       </button>
 
-                      <form method="POST"
-                            action="/tareas/<%= t.id_tarea %>/eliminar"
-                            style="display:inline"
-                            onsubmit="return confirm('¿Eliminar esta tarea?')">
-                        <input type="hidden" name="num_orden" value="<%= orden.num_orden %>">
-                        <button class="btn btn-outline btn-sm" type="submit">Eliminar</button>
-                      </form>
                     <% } else { %>
                       —
                     <% } %>
@@ -107,7 +100,7 @@
                 </tr>
               <% }) %>
             <% } else { %>
-              <tr><td colspan="5" class="empty">Todavía no hay tareas para esta OT</td></tr>
+              <tr><td colspan="5" class="empty">La tarea asociada todavía no fue creada</td></tr>
             <% } %>
           </tbody>
         </table>

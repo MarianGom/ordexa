@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Tarea = sequelize.define("Tarea", {
     id_tarea: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
-    num_orden: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false},
+    num_orden: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, unique: true },
     descripcion: { type: DataTypes.STRING(255), allowNull: true },
     materiales: { type: DataTypes.TEXT, allowNull: true },
     tiempo_necesario: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },

@@ -75,7 +75,7 @@ const ordenesController = {
           // Tareas + técnico (para mostrar "técnico asignado" real)
           {
             model: db.Tarea,
-            as: "tareas",
+            as: "tarea",
             required: false,
             attributes: ["id_tarea", "id_tecnico"],
             include: [
@@ -107,16 +107,10 @@ const ordenesController = {
       // (opcional) helper: dejar un "tecnicosResumen" por OT para el EJS
       // así no tenés que hacer lógica compleja en la vista
       const ordenes = rows.map((ot) => {
-        const tecnicos = (ot.tareas || [])
-          .map((t) =>
-            t.tecnico ? `${t.tecnico.nombre} ${t.tecnico.apellido}` : null,
-          )
-          .filter(Boolean);
-
-        const unicos = [...new Set(tecnicos)];
+        const tecnico = ot.tarea?.tecnico;
         return {
           ...ot.toJSON(),
-          tecnicosResumen: unicos.length ? unicos.join(", ") : null,
+          tecnicosResumen: tecnico ? `${tecnico.nombre} ${tecnico.apellido}` : null,
         };
       });
 
@@ -221,6 +215,7 @@ const ordenesController = {
         },
         { transaction: t },
       );
+      await db.Tarea.create({ num_orden: nuevaOT.num_orden }, { transaction: t });
 // Guardar archivos adjuntos
 if (req.files && req.files.length) {
   const archivos = req.files.map((archivo) => ({
@@ -289,10 +284,9 @@ if (req.files && req.files.length) {
         include: [
           {
             model: db.Tarea,
-            as: "tareas", // IMPORTANTE: que el alias coincida con tu asociación
+            as: "tarea",
             required: false,
             include: [{ model: db.Tecnico, as: "tecnico", required: false }],
-            order: [["id_tarea", "ASC"]],
           },
           {
             model: db.EstadoHistorial,
@@ -316,7 +310,7 @@ if (req.files && req.files.length) {
         user: req.session.user,
         currentPath: "/ordenes",
         orden,
-        tareas: orden.tareas || [],
+        tareas: orden.tarea ? [orden.tarea] : [],
         historial: orden.historial || [],
       });
     } catch (error) {
