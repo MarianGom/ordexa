@@ -72,7 +72,7 @@ const usuariosController = {
       // VALIDACIONES BÁSICAS
       // =========================
 
-      if (!cuil || !nombre || !apellido || !correo || !password) {
+      if (!cuil || !nombre || !apellido || !correo || !password || !id_rol) {
         const roles = await db.Rol.findAll();
         return res.render("usuarios/create", {
           title: "Nuevo Usuario",
@@ -160,11 +160,29 @@ const usuariosController = {
       // if (req.session.user.id_rol === 1) {
       //  rol = parseInt(id_rol) || 2;
      // }
-      let rol = 2; // operario por defecto
+      const esAdmin = Number(req.session.user.id_rol ?? req.session.user.rol) === 1;
+      if (!esAdmin) return res.status(403).send("No autorizado para asignar roles.");
 
-      // solo admin puede asignar rol
-      if (req.session.user.id_rol === 1) {
-         rol = parseInt(req.body.id_rol, 10) || 2;
+      const rol = Number.parseInt(id_rol, 10);
+      const rolSeleccionado = await db.Rol.findByPk(rol);
+      if (!rolSeleccionado) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(400).render("usuarios/create", {
+          title: "Nuevo Usuario", user: req.session.user, currentPath: "/usuarios",
+          roles, values: req.body, error: "Seleccioná un rol válido.",
+        });
+      }
+
+      if (password.length < 8) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(400).render("usuarios/create", {
+          title: "Nuevo Usuario",
+          user: req.session.user,
+          currentPath: "/usuarios",
+          roles,
+          values: req.body,
+          error: "La contraseña debe tener al menos 8 caracteres."
+        });
       }
 
       // =========================

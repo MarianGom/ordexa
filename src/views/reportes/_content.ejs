@@ -1,52 +1,53 @@
 <section>
-  <div class="page-header">
+  <div class="page-header report-heading">
     <div>
-      <h1>Reportes de órdenes</h1>
-      <p>Consultas habilitadas según tu rol.</p>
+      <h1 class="h1">Reportes</h1>
+      <p class="sub">Generá informes de órdenes de trabajo según distintos criterios</p>
     </div>
   </div>
 
-  <nav style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
-    <% const etiquetas = { estado: "Por estado", fechas: "Por fechas", responsable: "Por responsable", prioridad: "Por prioridad", tecnico: "Por técnico" }; %>
+  <nav class="report-tabs">
+    <% const etiquetas = { estado: "Por Estado", fechas: "Por Período", responsable: "Por Responsable", prioridad: "Por Prioridad", tecnico: "Por Técnico" }; %>
     <% tabsPermitidos.forEach(nombre => { %>
-      <a class="btn <%= tab === nombre ? 'btn-primary' : 'btn-ghost' %>" href="/reportes?tab=<%= nombre %>"><%= etiquetas[nombre] %></a>
+      <a class="report-tab <%= tab === nombre ? 'is-active' : '' %>" href="/reportes?tab=<%= nombre %>"><%= etiquetas[nombre] %></a>
     <% }) %>
   </nav>
 
-  <form method="GET" action="/reportes" class="card" style="margin-bottom:1rem">
+  <form method="GET" action="/reportes" class="card report-filter">
     <input type="hidden" name="tab" value="<%= tab %>">
-    <div style="display:flex;gap:1rem;align-items:end;flex-wrap:wrap">
+    <h2><%= tab === "fechas" ? "OT por período" : `OT ${etiquetas[tab]?.toLowerCase() || ""}` %></h2>
+    <div class="report-filter__fields">
       <% if (tab === "estado") { %>
-        <label>Estado
-          <select name="estado">
+        <label><span>Estado</span>
+          <select class="select" name="estado">
             <option value="all">Todos</option>
             <% estados.forEach(estado => { %><option value="<%= estado %>" <%= filtros.estado === estado ? "selected" : "" %>><%= estado %></option><% }) %>
           </select>
         </label>
       <% } %>
       <% if (tab === "fechas") { %>
-        <label>Desde <input type="date" name="desde" value="<%= filtros.desde %>"></label>
-        <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta %>"></label>
+        <label><span>Desde</span><input class="input" type="date" name="desde" value="<%= filtros.desde %>"></label>
+        <label><span>Hasta</span><input class="input" type="date" name="hasta" value="<%= filtros.hasta %>"></label>
       <% } %>
       <% if (tab === "responsable") { %>
-        <label>Responsable
-          <select name="id_responsable">
+        <label><span>Responsable</span>
+          <select class="select" name="id_responsable">
             <option value="all">Todos</option>
             <% responsables.forEach(persona => { %><option value="<%= persona.id_usuario %>" <%= filtros.id_responsable == persona.id_usuario ? "selected" : "" %>><%= persona.apellido %>, <%= persona.nombre %></option><% }) %>
           </select>
         </label>
       <% } %>
       <% if (tab === "prioridad") { %>
-        <label>Prioridad
-          <select name="prioridad">
+        <label><span>Prioridad</span>
+          <select class="select" name="prioridad">
             <option value="all">Todas</option>
             <% ["Alta", "Media", "Baja"].forEach(valor => { %><option value="<%= valor %>" <%= filtros.prioridad === valor ? "selected" : "" %>><%= valor %></option><% }) %>
           </select>
         </label>
       <% } %>
       <% if (tab === "tecnico") { %>
-        <label>Técnico
-          <select name="id_tecnico">
+        <label><span>Técnico</span>
+          <select class="select" name="id_tecnico">
             <option value="all">Todos</option>
             <% tecnicos.forEach(persona => { %><option value="<%= persona.id_tecnico %>" <%= filtros.id_tecnico == persona.id_tecnico ? "selected" : "" %>><%= persona.apellido %>, <%= persona.nombre %></option><% }) %>
           </select>
@@ -56,7 +57,7 @@
     </div>
   </form>
 
-  <div class="card" style="overflow:auto">
+  <div class="card report-results">
     <table class="table">
       <thead><tr>
         <% if (tab === "tecnico") { %><th>Técnico</th><% } %>

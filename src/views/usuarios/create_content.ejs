@@ -1,227 +1,88 @@
-<div class="stack-6">
-
-    <div class="row-between">
-        <div>
-            <h1 class="h1">Nuevo Usuario</h1>
-            <p class="sub">
-                Complete la información para registrar un nuevo usuario.
-            </p>
-        </div>
-
-        <a href="/usuarios" class="btn btn-outline">
-            ← Volver
-        </a>
+<section class="stack-6">
+  <div class="row-between">
+    <div>
+      <h1 class="h1">Nuevo Usuario</h1>
+      <p class="sub">Completá la información para registrar un nuevo usuario</p>
     </div>
+    <a href="/usuarios" class="btn btn-outline">← Volver</a>
+  </div>
 
-    <% if (error) { %>
+  <% if (error) { %>
+    <div class="alert alert--error"><%= error %></div>
+  <% } %>
 
-        <div class="card">
-            <div class="card__content">
-                <p style="color:#dc2626;font-weight:600;">
-                    <%= error %>
-                </p>
-            </div>
+  <form action="/usuarios" method="POST" class="card user-form">
+    <div class="card__header"><h2 class="card__title">Información del usuario</h2></div>
+    <div class="card__content">
+      <fieldset class="form-section">
+        <legend>Identificación</legend>
+        <div class="form-grid">
+          <label class="field"><span>CUIL *</span>
+            <input class="input" type="text" name="cuil" inputmode="numeric" maxlength="11"
+              placeholder="20123456789" value="<%= values.cuil || '' %>" required>
+          </label>
+          <label class="field"><span>Correo electrónico *</span>
+            <input class="input" type="email" name="correo" placeholder="usuario@ejemplo.com"
+              value="<%= values.correo || '' %>" required>
+          </label>
         </div>
+      </fieldset>
 
-    <% } %>
-
-    <div class="card card--shadow-sm">
-
-        <div class="card__header">
-            <h3 class="card__title">
-                Información del Usuario
-            </h3>
+      <fieldset class="form-section">
+        <legend>Datos personales</legend>
+        <div class="form-grid">
+          <label class="field"><span>Nombre *</span>
+            <input class="input" type="text" name="nombre" value="<%= values.nombre || '' %>" required>
+          </label>
+          <label class="field"><span>Apellido *</span>
+            <input class="input" type="text" name="apellido" value="<%= values.apellido || '' %>" required>
+          </label>
         </div>
+      </fieldset>
 
-        <div class="card__content">
-
-            <form action="/usuarios" method="POST">
-
-                <div class="filters">
-
-                    <div class="filters__row">
-
-                        <div class="field">
-                            <label>CUIL *</label>
-                            <input
-                                class="input"
-                                type="text"
-                                name="cuil"
-                                required
-                                value="<%= values.cuil || '' %>">
-                        </div>
-
-                        <div class="field">
-                            <label>Correo *</label>
-                            <input
-                                class="input"
-                                type="email"
-                                name="correo"
-                                required
-                                value="<%= values.correo || '' %>">
-                        </div>
-
-                    </div>
-
-                    <div class="filters__row">
-
-                        <div class="field">
-                            <label>Nombre *</label>
-                            <input
-                                class="input"
-                                type="text"
-                                name="nombre"
-                                required
-                                value="<%= values.nombre || '' %>">
-                        </div>
-
-                        <div class="field">
-                            <label>Apellido *</label>
-                            <input
-                                class="input"
-                                type="text"
-                                name="apellido"
-                                required
-                                value="<%= values.apellido || '' %>">
-                        </div>
-
-                    </div>
-
-                    <div class="filters__row">
-
-                        <div class="field">
-                            <label>Teléfono</label>
-                            <input
-                                class="input"
-                                type="text"
-                                name="telefono"
-                                value="<%= values.telefono || '' %>">
-                        </div>
-
-                        <div class="field">
-                            <label>Domicilio</label>
-                            <input
-                                class="input"
-                                type="text"
-                                name="domicilio"
-                                value="<%= values.domicilio || '' %>">
-                        </div>
-
-                    </div>
-
-                    <div class="filters__row">
-
-                        <div class="field" style="width:100%">
-                            <label>Observaciones</label>
-
-                            <textarea
-                                class="input"
-                                rows="4"
-                                name="observaciones"><%= values.observaciones || '' %></textarea>
-
-                        </div>
-
-                    </div>
-
-                    <% if (user && user.id_rol === 1) { %>
-
-                    <div class="filters__row">
-
-                        <div class="field">
-
-                            <label>Rol</label>
-
-                            <select
-                                class="select"
-                                name="id_rol">
-
-                                <% roles.forEach(rol => { %>
-
-                                    <option
-                                        value="<%= rol.id_rol %>"
-                                        <%= values.id_rol == rol.id_rol ? "selected" : "" %>>
-
-                                        <%= rol.nombre %>
-
-                                    </option>
-
-                                <% }) %>
-
-                            </select>
-
-                        </div>
-
-                        <div class="field">
-
-                            <label>Contraseña *</label>
-
-                            <input
-                                class="input"
-                                type="password"
-                                name="password"
-                                required>
-
-                        </div>
-
-                    </div>
-
-                    <% } else { %>
-
-                        <input
-                            type="hidden"
-                            name="id_rol"
-                            value="2">
-
-                        <div class="filters__row">
-
-                            <div class="field">
-
-                                <label>Contraseña *</label>
-
-                                <input
-                                    class="input"
-                                    type="password"
-                                    name="password"
-                                    required>
-
-                            </div>
-
-                        </div>
-
-                    <% } %>
-
-                </div>
-
-                <div
-                    style="
-                        display:flex;
-                        justify-content:flex-end;
-                        gap:12px;
-                        margin-top:30px;
-                    ">
-
-                    <a
-                        href="/usuarios"
-                        class="btn btn-outline">
-
-                        Cancelar
-
-                    </a>
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
-
-                        Guardar Usuario
-
-                    </button>
-
-                </div>
-
-            </form>
-
+      <fieldset class="form-section">
+        <legend>Contacto</legend>
+        <div class="form-grid">
+          <label class="field"><span>Teléfono</span>
+            <input class="input" type="text" name="telefono" inputmode="numeric"
+              placeholder="Ej: 3814123456" value="<%= values.telefono || '' %>">
+          </label>
+          <label class="field"><span>Domicilio</span>
+            <input class="input" type="text" name="domicilio" value="<%= values.domicilio || '' %>">
+          </label>
         </div>
+      </fieldset>
 
+      <fieldset class="form-section">
+        <legend>Información adicional</legend>
+        <label class="field"><span>Observaciones</span>
+          <textarea class="input" rows="3" name="observaciones"><%= values.observaciones || '' %></textarea>
+        </label>
+      </fieldset>
+
+      <fieldset class="form-section">
+        <legend>Acceso</legend>
+        <div class="form-grid">
+          <label class="field"><span>Rol *</span>
+            <select class="select" name="id_rol" required>
+              <option value="">Seleccionar rol</option>
+              <% roles.forEach(rol => { %>
+                <option value="<%= rol.id_rol %>" <%= String(values.id_rol || '') === String(rol.id_rol) ? 'selected' : '' %>>
+                  <%= rol.nombre %>
+                </option>
+              <% }) %>
+            </select>
+          </label>
+          <label class="field"><span>Contraseña *</span>
+            <input class="input" type="password" name="password" minlength="8"
+              placeholder="Mínimo 8 caracteres" required autocomplete="new-password">
+          </label>
+        </div>
+      </fieldset>
     </div>
-
-</div>
+    <div class="form-actions">
+      <a href="/usuarios" class="btn btn-outline">Cancelar</a>
+      <button type="submit" class="btn btn-primary">Guardar usuario</button>
+    </div>
+  </form>
+</section>

@@ -713,6 +713,126 @@ img.iconbox{
   font-size: 13px;
 }
 
+/* Usuarios, perfil y reportes */
+.user-form .card__header{ border-bottom:0; padding-bottom:4px; }
+.user-form .card__content{ padding-top:8px; }
+.form-section{
+  border:0;
+  border-bottom:1px solid var(--border);
+  padding:16px 0 18px;
+  margin:0;
+}
+.form-section legend,
+.profile-section h3{
+  padding:0;
+  margin:0 0 14px;
+  color:#8da0bc;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.form-grid,
+.profile-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.form-section .field span,
+.report-filter label span{
+  display:block;
+  margin-bottom:7px;
+  color:#405a7d;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:18px 20px;
+}
+
+.profile-summary{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:28px 24px;
+}
+.profile-avatar{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:var(--primary);
+  font-size:20px;
+  font-weight:800;
+}
+.profile-summary h2{ margin:0 0 4px; font-size:20px; }
+.profile-summary p{ margin:0 0 8px; color:var(--muted); }
+.role-badge{
+  display:inline-block;
+  padding:5px 12px;
+  border-radius:8px;
+  background:#e6edf5;
+  font-size:12px;
+  font-weight:700;
+}
+.profile-details{ padding:24px; }
+.profile-details>h2{ margin:0 0 18px; font-size:20px; }
+.profile-section{ padding:14px 0 20px; border-bottom:1px solid var(--border); }
+.profile-section:last-child{ border-bottom:0; padding-bottom:0; }
+.profile-grid>div{ display:flex; flex-direction:column; gap:8px; }
+.profile-grid span{
+  color:#405a7d;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.profile-email{ color:var(--primary); }
+
+.report-heading{ margin-bottom:18px; }
+.report-tabs{
+  display:flex;
+  gap:2px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:20px;
+  overflow-x:auto;
+}
+.report-tab{
+  padding:11px 16px;
+  color:#94a3b8;
+  font-size:13px;
+  white-space:nowrap;
+}
+.report-tab.is-active{
+  color:var(--primary);
+  background:#fff;
+  border:1px solid var(--border);
+  border-bottom-color:#fff;
+  border-radius:8px 8px 0 0;
+  margin-bottom:-1px;
+  font-weight:700;
+}
+.report-filter{ padding:20px; margin-bottom:18px; }
+.report-filter h2{ margin:0 0 16px; font-size:17px; }
+.report-filter__fields{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(180px,1fr)) auto;
+  align-items:end;
+  gap:18px;
+}
+.report-results{ overflow:auto; }
+
+@media (max-width:800px){
+  .form-grid,.profile-grid{ grid-template-columns:1fr; }
+  .report-filter__fields{ grid-template-columns:1fr; }
+  .profile-details{ padding:18px; }
+}
+
 /* =========================
    MODAL: estilos encapsulados (no pisa el resto)
    ========================= */
