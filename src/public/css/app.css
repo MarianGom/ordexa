@@ -340,6 +340,171 @@ textarea{ resize: vertical; }
 .input--success{ border-color:#16a34a; }
 .btn:disabled{ cursor:not-allowed; opacity:.55; }
 
+/* Mensajes del sistema */
+.alert{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  width:100%;
+  margin:0 0 20px;
+  padding:14px 16px;
+  border:1px solid transparent;
+  border-left-width:5px;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.45;
+  box-shadow:0 4px 14px rgba(15,23,42,.07);
+}
+.alert::before{
+  content:"i";
+  flex:0 0 22px;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  font-weight:800;
+  font-size:13px;
+}
+.alert--error{
+  color:#991b1b;
+  background:#fff1f2;
+  border-color:#fecdd3;
+  border-left-color:#dc2626;
+}
+.alert--error::before{ content:"!"; color:#fff; background:#dc2626; }
+.alert--success{
+  color:#166534;
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  border-left-color:#16a34a;
+}
+.alert--success::before{ content:"✓"; color:#fff; background:#16a34a; }
+.alert--warning{
+  color:#854d0e;
+  background:#fffbeb;
+  border-color:#fde68a;
+  border-left-color:#d97706;
+}
+.alert--warning::before{ content:"!"; color:#fff; background:#d97706; }
+.field-error{
+  display:block;
+  margin-top:7px;
+  color:#b91c1c;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* Mensajes del sistema */
+.alert{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  width:100%;
+  margin:0 0 20px;
+  padding:14px 16px;
+  border:1px solid transparent;
+  border-left-width:5px;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.45;
+  box-shadow:0 4px 14px rgba(15,23,42,.07);
+}
+.alert::before{
+  content:"i";
+  flex:0 0 22px;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  font-weight:800;
+  font-size:13px;
+}
+.alert--error{
+  color:#991b1b;
+  background:#fff1f2;
+  border-color:#fecdd3;
+  border-left-color:#dc2626;
+}
+.alert--error::before{ content:"!"; color:#fff; background:#dc2626; }
+.alert--success{
+  color:#166534;
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  border-left-color:#16a34a;
+}
+.alert--success::before{ content:"✓"; color:#fff; background:#16a34a; }
+.alert--warning{
+  color:#854d0e;
+  background:#fffbeb;
+  border-color:#fde68a;
+  border-left-color:#d97706;
+}
+.alert--warning::before{ content:"!"; color:#fff; background:#d97706; }
+.field-error{
+  display:block;
+  margin-top:7px;
+  color:#b91c1c;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* Mensajes del sistema */
+.alert{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  width:100%;
+  margin:0 0 20px;
+  padding:14px 16px;
+  border:1px solid transparent;
+  border-left-width:5px;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.45;
+  box-shadow:0 4px 14px rgba(15,23,42,.07);
+}
+.alert::before{
+  content:"i";
+  flex:0 0 22px;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  font-weight:800;
+  font-size:13px;
+}
+.alert--error{
+  color:#991b1b;
+  background:#fff1f2;
+  border-color:#fecdd3;
+  border-left-color:#dc2626;
+}
+.alert--error::before{ content:"!"; color:#fff; background:#dc2626; }
+.alert--success{
+  color:#166534;
+  background:#f0fdf4;
+  border-color:#bbf7d0;
+  border-left-color:#16a34a;
+}
+.alert--success::before{ content:"✓"; color:#fff; background:#16a34a; }
+.alert--warning{
+  color:#854d0e;
+  background:#fffbeb;
+  border-color:#fde68a;
+  border-left-color:#d97706;
+}
+.alert--warning::before{ content:"!"; color:#fff; background:#d97706; }
+.field-error{
+  display:block;
+  margin-top:7px;
+  color:#b91c1c;
+  font-size:12px;
+  font-weight:600;
+}
+
 /* Formularios completos (fuera de modales) */
 .page > .stack-6 .otform{
   display:flex;

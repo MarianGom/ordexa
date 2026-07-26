@@ -30,7 +30,6 @@ const dashboardRouter = require("./routes/dashboard");
 const usuariosRouter = require("./routes/usuarios");
 const consultaRouter = require("./routes/consulta");
 const perfilRouter = require("./routes/perfil");
-const tecnicosRouter = require("./routes/tecnicos");
 
 app.use(consultaRouter);
 app.use(dashboardRouter);
@@ -40,7 +39,6 @@ app.use(tareasRouter);
 app.use(reportesRouter);
 app.use(usuariosRouter);
 app.use(perfilRouter);
-app.use(tecnicosRouter);
 
 app.get("/", (req, res) => res.redirect("/login"));
 
