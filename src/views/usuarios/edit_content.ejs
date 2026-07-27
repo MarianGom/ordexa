@@ -39,23 +39,36 @@
                     <div class="filters__row">
 
                         <div class="field">
-                            <label>CUIL *</label>
+                            <label>CUIL <span class="req">*</span></label>
                             <input
                                 class="input"
+                                id="cuil"
                                 type="text"
                                 name="cuil"
+                                inputmode="numeric"
+                                minlength="11"
+                                maxlength="11"
+                                pattern="[0-9]{11}"
+                                title="Ingresá exactamente 11 números, sin guiones ni espacios"
+                                data-usuario-id="<%= usuario.id_usuario %>"
+                                aria-describedby="cuil-status"
                                 required
                                 value="<%= usuario.cuil %>">
+                            <span class="field-status" id="cuil-status" aria-live="polite"></span>
                         </div>
 
                         <div class="field">
-                            <label>Correo *</label>
+                            <label>Correo <span class="req">*</span></label>
                             <input
                                 class="input"
+                                id="correo"
                                 type="email"
                                 name="correo"
+                                data-usuario-id="<%= usuario.id_usuario %>"
+                                aria-describedby="correo-status"
                                 required
                                 value="<%= usuario.correo %>">
+                            <span class="field-status" id="correo-status" aria-live="polite"></span>
                         </div>
 
                     </div>
@@ -63,21 +76,23 @@
                     <div class="filters__row">
 
                         <div class="field">
-                            <label>Nombre *</label>
+                            <label>Nombre <span class="req">*</span></label>
                             <input
                                 class="input"
                                 type="text"
                                 name="nombre"
+                                minlength="2"
                                 required
                                 value="<%= usuario.nombre %>">
                         </div>
 
                         <div class="field">
-                            <label>Apellido *</label>
+                            <label>Apellido <span class="req">*</span></label>
                             <input
                                 class="input"
                                 type="text"
                                 name="apellido"
+                                minlength="2"
                                 required
                                 value="<%= usuario.apellido %>">
                         </div>
@@ -92,6 +107,9 @@
                                 class="input"
                                 type="text"
                                 name="telefono"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                title="Ingresá solamente números"
                                 value="<%= usuario.telefono || '' %>">
                         </div>
 
@@ -155,6 +173,7 @@
                                     class="input"
                                     type="password"
                                     name="password"
+                                    minlength="8"
                                     placeholder="Dejar vacío para no cambiar">
 
                             </div>
@@ -173,6 +192,7 @@
                                     class="input"
                                     type="password"
                                     name="password"
+                                    minlength="8"
                                     placeholder="Dejar vacío para no cambiar">
 
                             </div>
@@ -191,7 +211,7 @@
                         Cancelar
                     </a>
 
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="btnGuardarUsuario">
                         Guardar cambios
                     </button>
 

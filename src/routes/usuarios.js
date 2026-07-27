@@ -5,6 +5,18 @@ const usuariosController = require("../controllers/usuariosController");
 const soloRoles = require("../middlewares/soloRoles");
 
 router.get(
+  "/api/usuarios/verificar-cuil",
+  soloRoles("admin"),
+  usuariosController.verificarCuil
+);
+
+router.get(
+  "/api/usuarios/verificar-correo",
+  soloRoles("admin"),
+  usuariosController.verificarCorreo
+);
+
+router.get(
   "/usuarios",
   soloRoles("admin"),
   usuariosController.index

@@ -1,11 +1,93 @@
 const db = require("../database/models");
 const bcrypt = require("bcryptjs");
+const { Op } = db.Sequelize;
+
+const CUIL_REGEX = /^\d{11}$/;
 
 const usuariosController = {
 
+  verificarCuil: async (req, res) => {
+    try {
+      const cuil = String(req.query.cuil || "").trim();
+      const excluirId = Number.parseInt(req.query.excluir_id, 10);
+
+      if (!CUIL_REGEX.test(cuil)) {
+        return res.status(400).json({
+          existe: false,
+          error: "El CUIL debe contener exactamente 11 números."
+        });
+      }
+
+      const where = { cuil };
+      if (Number.isInteger(excluirId) && excluirId > 0) {
+        where.id_usuario = { [db.Sequelize.Op.ne]: excluirId };
+      }
+
+      const usuario = await db.Usuario.findOne({
+        where,
+        attributes: ["id_usuario"]
+      });
+
+      return res.json({ existe: Boolean(usuario) });
+    } catch (error) {
+      console.error("Error verificando CUIL:", error);
+      return res.status(500).json({
+        existe: false,
+        error: "No se pudo verificar el CUIL."
+      });
+    }
+  },
+
+  verificarCorreo: async (req, res) => {
+    try {
+      const correo = String(req.query.correo || "").trim().toLowerCase();
+      const excluirId = Number.parseInt(req.query.excluir_id, 10);
+
+      if (!/^\S+@\S+\.\S+$/.test(correo)) {
+        return res.status(400).json({
+          existe: false,
+          error: "Ingresá un correo electrónico válido."
+        });
+      }
+
+      const where = { correo };
+      if (Number.isInteger(excluirId) && excluirId > 0) {
+        where.id_usuario = { [db.Sequelize.Op.ne]: excluirId };
+      }
+
+      const usuario = await db.Usuario.findOne({
+        where,
+        attributes: ["id_usuario"]
+      });
+
+      return res.json({ existe: Boolean(usuario) });
+    } catch (error) {
+      console.error("Error verificando correo:", error);
+      return res.status(500).json({
+        existe: false,
+        error: "No se pudo verificar el correo."
+      });
+    }
+  },
+
   index: async (req, res) => {
     try {
+      const q = String(req.query.q || "").trim().slice(0, 100);
+      const terminos = q.split(/\s+/).filter(Boolean);
+      const where = terminos.length
+        ? {
+            [Op.and]: terminos.map(termino => ({
+              [Op.or]: [
+                { cuil: { [Op.like]: `%${termino}%` } },
+                { nombre: { [Op.like]: `%${termino}%` } },
+                { apellido: { [Op.like]: `%${termino}%` } }
+              ]
+            }))
+          }
+        : undefined;
+
       const usuarios = await db.Usuario.findAll({
+        where,
         include: [
           {
             model: db.Rol,
@@ -14,9 +96,9 @@ const usuariosController = {
           }
         ],
         order: [
-          ["activo", "DESC"],
           ["apellido", "ASC"],
-          ["nombre", "ASC"]
+          ["nombre", "ASC"],
+          ["id_usuario", "ASC"]
         ]
       });
 
@@ -24,7 +106,8 @@ const usuariosController = {
         title: "Gestionar Usuarios",
         user: req.session.user,
         currentPath: "/usuarios",
-        usuarios
+        usuarios,
+        q
       });
 
     } catch (error) {
@@ -68,6 +151,12 @@ const usuariosController = {
         id_rol
       } = req.body;
 
+      cuil = String(cuil || "").trim();
+      nombre = String(nombre || "").trim();
+      apellido = String(apellido || "").trim();
+      correo = String(correo || "").trim().toLowerCase();
+      telefono = String(telefono || "").trim();
+
       // =========================
       // VALIDACIONES BÁSICAS
       // =========================
@@ -84,16 +173,16 @@ const usuariosController = {
         });
       }
 
-      // CUIL solo números
-      if (!/^\d+$/.test(cuil)) {
+      // El CUIL argentino debe contener exactamente 11 dígitos.
+      if (!CUIL_REGEX.test(cuil)) {
         const roles = await db.Rol.findAll();
-        return res.render("usuarios/create", {
+        return res.status(400).render("usuarios/create", {
           title: "Nuevo Usuario",
           user: req.session.user,
           currentPath: "/usuarios",
           roles,
-          values: req.body,
-          error: "El CUIL debe contener solo números."
+          values: { ...req.body, cuil, nombre, apellido, correo, telefono },
+          error: "El CUIL debe contener exactamente 11 números."
         });
       }
 
@@ -261,19 +350,70 @@ const usuariosController = {
       const usuario = await db.Usuario.findByPk(req.params.id);
       if (!usuario) return res.status(404).send("Usuario no encontrado");
 
+      const cuil = String(req.body.cuil || "").trim();
+
       // validación básica teléfono y cuil
-      if (!/^\d+$/.test(req.body.cuil)) {
-        return res.status(400).send("CUIL inválido");
+      if (!CUIL_REGEX.test(cuil)) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(400).render("usuarios/edit", {
+          title: "Editar Usuario",
+          user: req.session.user,
+          currentPath: "/usuarios",
+          usuario,
+          roles,
+          error: "El CUIL debe contener exactamente 11 números."
+        });
       }
 
       if (req.body.telefono && !/^\d+$/.test(req.body.telefono)) {
         return res.status(400).send("Teléfono inválido");
       }
 
-      usuario.cuil = req.body.cuil;
+      const usuarioConMismoCuil = await db.Usuario.findOne({
+        where: {
+          cuil,
+          id_usuario: { [db.Sequelize.Op.ne]: usuario.id_usuario }
+        }
+      });
+      if (usuarioConMismoCuil) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(409).render("usuarios/edit", {
+          title: "Editar Usuario",
+          user: req.session.user,
+          currentPath: "/usuarios",
+          usuario,
+          roles,
+          error: "Ya existe otro usuario con ese CUIL."
+        });
+      }
+
+      const correo = String(req.body.correo || "").trim().toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(correo)) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(400).render("usuarios/edit", {
+          title: "Editar Usuario", user: req.session.user, currentPath: "/usuarios",
+          usuario, roles, error: "Ingresá un correo electrónico válido."
+        });
+      }
+
+      const usuarioConMismoCorreo = await db.Usuario.findOne({
+        where: {
+          correo,
+          id_usuario: { [db.Sequelize.Op.ne]: usuario.id_usuario }
+        }
+      });
+      if (usuarioConMismoCorreo) {
+        const roles = await db.Rol.findAll({ order: [["nombre", "ASC"]] });
+        return res.status(409).render("usuarios/edit", {
+          title: "Editar Usuario", user: req.session.user, currentPath: "/usuarios",
+          usuario, roles, error: "Ese correo ya está registrado por otro usuario."
+        });
+      }
+
+      usuario.cuil = cuil;
       usuario.nombre = req.body.nombre;
       usuario.apellido = req.body.apellido;
-      usuario.correo = req.body.correo;
+      usuario.correo = correo;
       usuario.telefono = req.body.telefono;
       usuario.domicilio = req.body.domicilio;
       usuario.observaciones = req.body.observaciones;

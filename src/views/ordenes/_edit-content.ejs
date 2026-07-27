@@ -321,6 +321,8 @@
               name="archivos"
               multiple
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              data-existing-count="<%= orden.archivos?.length || 0 %>"
+              aria-describedby="archivos-status"
             >
 
             <label
@@ -368,7 +370,8 @@
                   Haga clic para seleccionar archivos
                 </div>
 
-                <div class="dropzone__sub">o arrastre y suelte aquí (Hasta 5 Archivos)
+                <div class="dropzone__sub">
+                  o arrastre y suelte aquí (máximo 5 archivos en total)
                 </div>
 
               </div>
@@ -380,6 +383,7 @@
               class="filelist"
               id="filelist"
             ></div>
+            <p class="field-status" id="archivos-status" aria-live="polite"></p>
 
           </div>
 
@@ -414,19 +418,19 @@
   document.addEventListener("DOMContentLoaded", () => {
     const inputArchivos = document.getElementById("archivos");
     const fileList = document.getElementById("filelist");
+    const statusArchivos = document.getElementById("archivos-status");
+    const archivosExistentes = Number(inputArchivos?.dataset.existingCount || 0);
+    const MAX_ARCHIVOS = 5;
 
     let archivosSeleccionados = [];
 
     inputArchivos?.addEventListener("change", () => {
       const nuevosArchivos = Array.from(inputArchivos.files);
 
-      archivosSeleccionados = [
+      const seleccionPropuesta = [
         ...archivosSeleccionados,
         ...nuevosArchivos,
-      ];
-
-      // Evita duplicados por nombre, tamaño y última modificación
-      archivosSeleccionados = archivosSeleccionados.filter(
+      ].filter(
         (archivo, indice, lista) =>
           indice ===
           lista.findIndex(
@@ -437,6 +441,19 @@
           )
       );
 
+      if (archivosExistentes + seleccionPropuesta.length > MAX_ARCHIVOS) {
+        const disponibles = Math.max(MAX_ARCHIVOS - archivosExistentes - archivosSeleccionados.length, 0);
+        statusArchivos.textContent = disponibles
+          ? `Podés agregar ${disponibles} archivo${disponibles === 1 ? "" : "s"} más. El máximo es 5 por orden.`
+          : "La orden ya alcanzó el máximo de 5 archivos adjuntos.";
+        statusArchivos.className = "field-status field-status--warning";
+        actualizarInput();
+        return;
+      }
+
+      archivosSeleccionados = seleccionPropuesta;
+      statusArchivos.textContent = "";
+      statusArchivos.className = "field-status";
       actualizarInput();
       renderizarLista();
     });

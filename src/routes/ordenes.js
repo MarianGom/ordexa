@@ -6,12 +6,12 @@ const soloRoles = require("../middlewares/soloRoles");
 const otAbierta = require("../middlewares/otAbierta");
 const soloResponsableDeOT = require("../middlewares/soloResponsableDeOT");
 const ordenesController = require("../controllers/ordenesController");
-const uploadOT = require("../middlewares/uploadOT");
+const procesarArchivosOT = require("../middlewares/procesarArchivosOT");
 
 // Crear OT (Operario + Admin)
 router.get("/ordenes/nueva", authMiddleware, soloRoles("operario", "admin"), ordenesController.create);
 router.get("/api/ordenes/verificar-tramite", authMiddleware, soloRoles("operario", "admin"), ordenesController.verificarTramite);
-router.post("/ordenes", authMiddleware, soloRoles("operario", "admin"),uploadOT.array("archivos", 5), ordenesController.store);
+router.post("/ordenes", authMiddleware, soloRoles("operario", "admin"), procesarArchivosOT, ordenesController.store);
 
 // Ver listado y detalle (cualquiera logueado)
 router.get("/ordenes", authMiddleware, ordenesController.index);
@@ -30,7 +30,7 @@ router.post("/ordenes/:id/editar",
   authMiddleware,
   soloRoles("operario", "admin"),
   otAbierta,
-  uploadOT.array("archivos", 5),
+  procesarArchivosOT,
   ordenesController.update
 );
 

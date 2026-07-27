@@ -113,9 +113,62 @@ const reportesController = {
         }),
       ]);
 
+      const contar = (condicion) => ordenes.filter(condicion).length;
+      let resumen = [{ etiqueta: "Total de OT", valor: ordenes.length }];
+
+      if (tab === "estado" || tab === "fechas") {
+        resumen = [
+          ...resumen,
+          {
+            etiqueta: "En curso",
+            valor: contar(orden => !["Finalizado", "Cancelado"].includes(orden.estado_actual)),
+          },
+          {
+            etiqueta: "Finalizadas",
+            valor: contar(orden => orden.estado_actual === "Finalizado"),
+          },
+          {
+            etiqueta: "Canceladas",
+            valor: contar(orden => orden.estado_actual === "Cancelado"),
+          },
+        ];
+      } else if (tab === "responsable") {
+        resumen = [
+          ...resumen,
+          {
+            etiqueta: "Con responsable",
+            valor: contar(orden => Boolean(orden.id_responsable)),
+          },
+          {
+            etiqueta: "Sin responsable",
+            valor: contar(orden => !orden.id_responsable),
+          },
+        ];
+      } else if (tab === "prioridad") {
+        resumen = [
+          ...resumen,
+          { etiqueta: "Prioridad alta", valor: contar(orden => orden.prioridad === "Alta") },
+          { etiqueta: "Prioridad media", valor: contar(orden => orden.prioridad === "Media") },
+          { etiqueta: "Prioridad baja", valor: contar(orden => orden.prioridad === "Baja") },
+        ];
+      } else if (tab === "tecnico") {
+        resumen = [
+          ...resumen,
+          {
+            etiqueta: "Con técnico",
+            valor: contar(orden => Boolean(orden.tarea?.id_tecnico)),
+          },
+          {
+            etiqueta: "Sin técnico",
+            valor: contar(orden => !orden.tarea?.id_tecnico),
+          },
+        ];
+      }
+
       return res.render("reportes/index", {
         title: "Reportes", user: req.session.user, currentPath: "/reportes",
-        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos, estados: ESTADOS,
+        tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos,
+        estados: ESTADOS, resumen,
       });
     } catch (error) {
       console.error("Error generando reporte:", error);

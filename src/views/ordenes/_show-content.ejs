@@ -1,7 +1,8 @@
 <div class="stack-6" id="otPage" data-num-orden="<%= orden.num_orden %>">
 
   <% const rol = Number(user?.id_rol ?? user?.rol); %>
-  <% const canEditOrder = rol === 1 || rol === 2; %>
+  <% const ordenCerrada = ["Finalizado", "Cancelado"].includes(orden.estado_actual); %>
+  <% const canEditOrder = (rol === 1 || rol === 2) && !ordenCerrada; %>
   <% const canExecute = rol === 1 || (rol === 3 && Number(orden.id_responsable) === Number(user?.id_usuario)); %>
 
   <div class="row-between">

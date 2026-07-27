@@ -5,18 +5,38 @@
 
         <div>
             <h1 class="h1">Gestionar Usuarios</h1>
-            <p class="sub">Administra usuarios, roles y permisos del sistema</p>
+            <p class="sub">Administrá usuarios, roles y permisos del sistema</p>
         </div>
 
         <a href="/usuarios/create" class="btn btn-primary">
             <span class="btn__icon">＋</span>
-            Nuevo Usuario
+            Nuevo usuario
         </a>
 
     </div>
 
     <!-- CARD TABLE -->
     <div class="card card--shadow-sm">
+
+        <div class="list-toolbar">
+            <form class="list-search" method="GET" action="/usuarios" role="search">
+                <label for="buscar-usuario">Buscar usuario</label>
+                <div class="list-search__controls">
+                    <input
+                        class="input"
+                        id="buscar-usuario"
+                        type="search"
+                        name="q"
+                        value="<%= q || '' %>"
+                        placeholder="CUIL, nombre o apellido"
+                        autocomplete="off">
+                    <button class="btn btn-primary" type="submit">Buscar</button>
+                    <% if (q) { %>
+                        <a class="btn btn-outline" href="/usuarios">Limpiar</a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
 
         <div class="card__content card__content--noPad">
 
@@ -49,8 +69,7 @@
                                     </td>
 
                                     <td>
-                                        <%= u.nombre %>
-                                            <%= u.apellido %>
+                                        <%= u.apellido %>, <%= u.nombre %>
                                     </td>
 
                                     <td>
@@ -134,7 +153,9 @@
 
                                         <tr>
                                             <td colspan="7" class="empty">
-                                                No hay usuarios registrados
+                                                <%= q
+                                                    ? `No se encontraron usuarios para “${q}”.`
+                                                    : "No hay usuarios registrados." %>
                                             </td>
                                         </tr>
 
@@ -153,22 +174,45 @@
 </div>
 
 <script>
-    document.querySelectorAll("[data-menu-btn]").forEach((btn) => {
-        const wrap = btn.parentElement;
-        const menu = wrap.querySelector("[data-menu]");
+    const GAP = 8;
 
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
+    function closeAllMenus() {
+        document.querySelectorAll("[data-menu]")
+            .forEach(menu => menu.classList.add("is-hidden"));
+    }
 
-            document.querySelectorAll("[data-menu]")
-                .forEach(m => m.classList.add("is-hidden"));
+    function placeMenu(button, menu) {
+        const buttonRect = button.getBoundingClientRect();
+        let top = buttonRect.bottom + GAP;
+        let left = buttonRect.right - menu.offsetWidth;
 
-            menu.classList.toggle("is-hidden");
+        left = Math.max(GAP, Math.min(left, window.innerWidth - menu.offsetWidth - GAP));
+
+        if (top + menu.offsetHeight > window.innerHeight - GAP) {
+            top = buttonRect.top - menu.offsetHeight - GAP;
+        }
+
+        top = Math.max(GAP, top);
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
+    }
+
+    document.querySelectorAll("[data-menu-btn]").forEach((button) => {
+        const menu = button.parentElement.querySelector("[data-menu]");
+
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const estabaAbierto = !menu.classList.contains("is-hidden");
+            closeAllMenus();
+
+            if (!estabaAbierto) {
+                menu.classList.remove("is-hidden");
+                requestAnimationFrame(() => placeMenu(button, menu));
+            }
         });
     });
 
-    document.addEventListener("click", () => {
-        document.querySelectorAll("[data-menu]")
-            .forEach(m => m.classList.add("is-hidden"));
-    });
+    document.addEventListener("click", closeAllMenus);
+    window.addEventListener("scroll", closeAllMenus, true);
+    window.addEventListener("resize", closeAllMenus);
 </script>

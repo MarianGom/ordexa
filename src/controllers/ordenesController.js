@@ -355,12 +355,22 @@ if (req.files && req.files.length) {
 
       if (!orden) return res.status(404).send("Orden no encontrada");
 
+      // Las OT creadas antes de incorporar la tarea automática pueden no tenerla.
+      // Restablecemos la invariante definida en la especificación: una tarea por OT.
+      let tarea = orden.tarea;
+      if (!tarea) {
+        [tarea] = await db.Tarea.findOrCreate({
+          where: { num_orden: orden.num_orden },
+          defaults: { num_orden: orden.num_orden },
+        });
+      }
+
       return res.render("ordenes/show", {
         title: `OT #${orden.num_orden}`,
         user: req.session.user,
         currentPath: "/ordenes",
         orden,
-        tareas: orden.tarea ? [orden.tarea] : [],
+        tareas: [tarea],
         historial: orden.historial || [],
       });
     } catch (error) {
@@ -632,12 +642,11 @@ destroyArchivo: async (req, res) => {
 
     const roleId = Number(req.session.user.id_rol ?? req.session.user.rol);
     const esAdmin = roleId === 1;
-    const esResponsableAsignado = roleId === 3 &&
-      Number(orden.id_responsable) === Number(req.session.user.id_usuario);
+    const esOperario = roleId === 2;
 
-    if (!esAdmin && !esResponsableAsignado) {
+    if (!esAdmin && !esOperario) {
       await t.rollback();
-      return res.status(403).send("No autorizado para modificar esta orden");
+      return res.status(403).send("No autorizado para eliminar adjuntos de esta orden");
     }
 
     if (["Finalizado", "Cancelado"].includes(orden.estado_actual)) {
@@ -651,7 +660,7 @@ destroyArchivo: async (req, res) => {
 
     const rutaFisica = path.join(
       __dirname,
-      "../../public",
+      "../public",
       rutaRelativa,
     );
 
@@ -675,7 +684,11 @@ destroyArchivo: async (req, res) => {
       }
     }
 
-    return res.redirect(`/ordenes/${numOrden}`);
+    req.session.flash = {
+      type: "success",
+      message: "Archivo adjunto eliminado correctamente.",
+    };
+    return res.redirect(`/ordenes/${numOrden}/editar`);
   } catch (error) {
     await t.rollback();
 

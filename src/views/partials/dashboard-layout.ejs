@@ -220,9 +220,189 @@
   };
   window.initVerificacionTramite(document);
 
+  window.initVerificacionCuil = function(root = document) {
+    const input = root.querySelector("#cuil");
+    if (!input || input.dataset.verificacionActiva === "true") return;
+
+    const status = root.querySelector("#cuil-status");
+    const submit = root.querySelector("#btnGuardarUsuario");
+    const form = input.form;
+    let ultimaConsulta = 0;
+    let cuilDuplicado = false;
+    input.dataset.verificacionActiva = "true";
+    input.dataset.duplicado = "false";
+
+    const actualizarBoton = () => {
+      submit.disabled = [...form.querySelectorAll("[data-duplicado]")]
+        .some(campo => campo.dataset.duplicado === "true");
+    };
+
+    const mostrar = (mensaje, tipo = "") => {
+      status.textContent = mensaje;
+      status.className = `field-status ${tipo ? `field-status--${tipo}` : ""}`;
+      input.classList.toggle("input--error", tipo === "error");
+      input.classList.toggle("input--success", tipo === "success");
+    };
+
+    const verificar = async () => {
+      const cuil = input.value.trim();
+      const consulta = ++ultimaConsulta;
+      cuilDuplicado = false;
+      input.dataset.duplicado = "false";
+      actualizarBoton();
+
+      if (!cuil) return mostrar("");
+      if (!/^\d{11}$/.test(cuil)) {
+        return mostrar("El CUIL debe contener exactamente 11 números.", "error");
+      }
+
+      mostrar("Verificando CUIL…");
+      try {
+        const excluirId = input.dataset.usuarioId;
+        const parametros = new URLSearchParams({ cuil });
+        if (excluirId) parametros.set("excluir_id", excluirId);
+
+        const response = await fetch(`/api/usuarios/verificar-cuil?${parametros.toString()}`);
+        if (!response.ok) throw new Error("No se pudo verificar");
+        const resultado = await response.json();
+        if (consulta !== ultimaConsulta) return;
+
+        cuilDuplicado = resultado.existe;
+        input.dataset.duplicado = String(cuilDuplicado);
+        actualizarBoton();
+        mostrar(
+          cuilDuplicado
+            ? "Este CUIL ya está registrado."
+            : "CUIL disponible.",
+          cuilDuplicado ? "error" : "success"
+        );
+      } catch {
+        if (consulta !== ultimaConsulta) return;
+        mostrar("No se pudo verificar ahora; se comprobará al guardar.", "warning");
+      }
+    };
+
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "").slice(0, 11);
+      if (input.value.length === 11) {
+        verificar();
+      } else {
+        ++ultimaConsulta;
+        cuilDuplicado = false;
+        input.dataset.duplicado = "false";
+        actualizarBoton();
+        mostrar(input.value.length ? "El CUIL debe contener exactamente 11 números." : "", input.value.length ? "error" : "");
+      }
+    });
+    input.addEventListener("blur", verificar);
+    form.addEventListener("submit", (event) => {
+      if (cuilDuplicado) {
+        event.preventDefault();
+        input.focus();
+      }
+    });
+  };
+  window.initVerificacionCuil(document);
+
+  window.initVerificacionCorreo = function(root = document) {
+    const input = root.querySelector("#correo");
+    if (!input || input.dataset.verificacionActiva === "true") return;
+
+    const status = root.querySelector("#correo-status");
+    const submit = root.querySelector("#btnGuardarUsuario");
+    const form = input.form;
+    let timer;
+    let ultimaConsulta = 0;
+    let correoDuplicado = false;
+    input.dataset.verificacionActiva = "true";
+    input.dataset.duplicado = "false";
+
+    const actualizarBoton = () => {
+      submit.disabled = [...form.querySelectorAll("[data-duplicado]")]
+        .some(campo => campo.dataset.duplicado === "true");
+    };
+    const mostrar = (mensaje, tipo = "") => {
+      status.textContent = mensaje;
+      status.className = `field-status ${tipo ? `field-status--${tipo}` : ""}`;
+      input.classList.toggle("input--error", tipo === "error");
+      input.classList.toggle("input--success", tipo === "success");
+    };
+    const verificar = async () => {
+      const correo = input.value.trim().toLowerCase();
+      const consulta = ++ultimaConsulta;
+      correoDuplicado = false;
+      input.dataset.duplicado = "false";
+      actualizarBoton();
+
+      if (!correo) return mostrar("");
+      if (!input.validity.valid) {
+        return mostrar("Ingresá un correo electrónico válido.", "error");
+      }
+
+      mostrar("Verificando correo…");
+      try {
+        const excluirId = input.dataset.usuarioId;
+        const parametros = new URLSearchParams({ correo });
+        if (excluirId) parametros.set("excluir_id", excluirId);
+
+        const response = await fetch(`/api/usuarios/verificar-correo?${parametros.toString()}`);
+        if (!response.ok) throw new Error("No se pudo verificar");
+        const resultado = await response.json();
+        if (consulta !== ultimaConsulta) return;
+
+        correoDuplicado = resultado.existe;
+        input.dataset.duplicado = String(correoDuplicado);
+        actualizarBoton();
+        mostrar(
+          correoDuplicado
+            ? "Este correo ya está registrado."
+            : "Correo disponible.",
+          correoDuplicado ? "error" : "success"
+        );
+      } catch {
+        if (consulta !== ultimaConsulta) return;
+        mostrar("No se pudo verificar ahora; se comprobará al guardar.", "warning");
+      }
+    };
+
+    input.addEventListener("input", () => {
+      clearTimeout(timer);
+      ++ultimaConsulta;
+      correoDuplicado = false;
+      input.dataset.duplicado = "false";
+      actualizarBoton();
+      mostrar("");
+      timer = setTimeout(verificar, 500);
+    });
+    input.addEventListener("blur", () => {
+      clearTimeout(timer);
+      verificar();
+    });
+    form.addEventListener("submit", (event) => {
+      if (correoDuplicado) {
+        event.preventDefault();
+        input.focus();
+      }
+    });
+  };
+  window.initVerificacionCorreo(document);
+
   document.querySelectorAll("[data-confirm-logout]").forEach((link) => {
     link.addEventListener("click", (event) => {
       if (!window.confirm("¿Está seguro de que desea cerrar sesión?")) {
+        event.preventDefault();
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-confirm-delete-order]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      const numeroOrden = form.dataset.orderNumber;
+      const confirmado = window.confirm(
+        `¿Está seguro de que desea dar de baja la OT #${numeroOrden}?\n\nEsta acción quitará la orden de los listados activos.`
+      );
+
+      if (!confirmado) {
         event.preventDefault();
       }
     });

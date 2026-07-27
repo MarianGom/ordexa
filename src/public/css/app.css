@@ -610,6 +610,71 @@ textarea{ resize: vertical; }
 
 .empty{ text-align:center; color: var(--muted); padding: 30px !important; }
 
+.list-toolbar{
+  padding:18px;
+  border-bottom:1px solid var(--border);
+  background:#fff;
+}
+.list-search{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-width:680px;
+}
+.list-search > label{
+  color:#405a7d;
+  font-size:12px;
+  font-weight:700;
+}
+.list-search__controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.list-search__controls .input{
+  flex:1 1 320px;
+  min-width:180px;
+}
+
+.report-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+  margin:18px 0;
+}
+.report-summary__item{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:16px 18px;
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  background:#fff;
+  box-shadow:var(--shadow-sm);
+}
+.report-summary__item span{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+.report-summary__item strong{
+  color:var(--text);
+  font-size:26px;
+  line-height:1;
+}
+.report-total{
+  padding:14px 18px;
+  border-top:1px solid var(--border);
+  background:#f8fafc;
+  color:var(--muted);
+  font-size:13px;
+  text-align:right;
+}
+@media (max-width:640px){
+  .list-search__controls{ align-items:stretch; flex-direction:column; }
+  .list-search__controls .input{ flex-basis:auto; width:100%; }
+}
+
 .clamp-2{
   display:-webkit-box;
   -webkit-box-orient: vertical;
@@ -962,7 +1027,7 @@ img.iconbox{
   color:#405a7d;
   font-size:12px;
   font-weight:700;
-  text-transform:uppercase;
+  text-transform:none;
 }
 .form-section{
   border:0;
@@ -986,15 +1051,33 @@ img.iconbox{
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:14px;
 }
-.form-section .field span,
+.form-section .field > .field-label,
 .report-filter label span{
   display:block;
   margin-bottom:7px;
   color:#405a7d;
   font-size:12px;
   font-weight:700;
-  text-transform:uppercase;
+  text-transform:none;
 }
+.req{
+  margin-left:4px;
+  color:#ef4444;
+}
+.user-form .field .field-status{
+  display:block;
+  min-height:18px;
+  margin:0;
+  color:inherit;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.5;
+  letter-spacing:normal;
+  text-transform:none;
+}
+.user-form .field .field-status--error{ color:#b91c1c; }
+.user-form .field .field-status--success{ color:#15803d; }
+.user-form .field .field-status--warning{ color:#a16207; }
 .form-actions{
   display:flex;
   justify-content:flex-end;

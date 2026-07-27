@@ -170,12 +170,15 @@
 
                                         <div class="menu v0-menu is-hidden" data-menu>
                                             <a class="menu__item" href="/ordenes/<%= o.num_orden %>">👁 Ver Detalles</a>
-                                            <% if (canEditOrder) { %>
+                                            <% if (canEditOrder && !["Finalizado", "Cancelado"].includes(o.estado_actual)) { %>
                                               <a class="menu__item" href="/ordenes/<%= o.num_orden %>/editar">✏ Editar</a>
                                             <% } %>
                                             <% if (canDeleteOrder) { %>
-                                            <form method="POST" action="/ordenes/<%= o.num_orden %>/eliminar"
-                                                onsubmit="return confirm('¿Eliminar esta OT?')">
+                                            <form
+                                                method="POST"
+                                                action="/ordenes/<%= o.num_orden %>/eliminar"
+                                                data-confirm-delete-order
+                                                data-order-number="<%= o.num_orden %>">
                                                 <button class="menu__item menu__item--danger" type="submit">🗑
                                                     Eliminar</button>
                                             </form>
@@ -302,6 +305,8 @@ function initDropzone() {
   const inputArchivos = document.getElementById("archivos");
   const fileList = document.getElementById("filelist");
   const dropzone = document.getElementById("dropzone");
+  const statusArchivos = document.getElementById("archivos-status");
+  const MAX_ARCHIVOS = 5;
 
   if (!inputArchivos || !fileList) {
     return;
@@ -312,13 +317,13 @@ function initDropzone() {
   inputArchivos.addEventListener("change", () => {
     const nuevosArchivos = Array.from(inputArchivos.files);
 
-    archivosSeleccionados = [
+    const seleccionPropuesta = [
       ...archivosSeleccionados,
       ...nuevosArchivos,
     ];
 
     // Evita duplicados por nombre, tamaño y última modificación
-    archivosSeleccionados = archivosSeleccionados.filter(
+    const seleccionSinDuplicados = seleccionPropuesta.filter(
       (archivo, indice, lista) =>
         indice ===
         lista.findIndex(
@@ -329,6 +334,16 @@ function initDropzone() {
         )
     );
 
+    if (seleccionSinDuplicados.length > MAX_ARCHIVOS) {
+      statusArchivos.textContent = "Solo podés adjuntar hasta 5 archivos por orden.";
+      statusArchivos.className = "field-status field-status--warning";
+      actualizarInput();
+      return;
+    }
+
+    archivosSeleccionados = seleccionSinDuplicados;
+    statusArchivos.textContent = "";
+    statusArchivos.className = "field-status";
     actualizarInput();
     renderizarLista();
   });
@@ -441,14 +456,14 @@ function initDropzone() {
         e.dataTransfer.files
       );
 
-      archivosSeleccionados = [
+      const seleccionPropuesta = [
         ...archivosSeleccionados,
         ...nuevosArchivos,
       ];
 
       // Evita archivos duplicados
-      archivosSeleccionados =
-        archivosSeleccionados.filter(
+      const seleccionSinDuplicados =
+        seleccionPropuesta.filter(
           (archivo, indice, lista) =>
             indice ===
             lista.findIndex(
@@ -459,6 +474,15 @@ function initDropzone() {
             )
         );
 
+      if (seleccionSinDuplicados.length > MAX_ARCHIVOS) {
+        statusArchivos.textContent = "Solo podés adjuntar hasta 5 archivos por orden.";
+        statusArchivos.className = "field-status field-status--warning";
+        return;
+      }
+
+      archivosSeleccionados = seleccionSinDuplicados;
+      statusArchivos.textContent = "";
+      statusArchivos.className = "field-status";
       actualizarInput();
       renderizarLista();
     });

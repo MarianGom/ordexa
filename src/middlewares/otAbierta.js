@@ -9,7 +9,11 @@ module.exports = async (req, res, next) => {
 
     const cerrados = ["Finalizado", "Cancelado"];
     if (cerrados.includes(orden.estado_actual)) {
-      return res.status(403).send("La orden está cerrada. No se pueden realizar cambios.");
+      req.session.flash = {
+        type: "warning",
+        message: `La OT #${orden.num_orden} está ${orden.estado_actual.toLowerCase()} y no admite modificaciones.`,
+      };
+      return res.redirect(`/ordenes/${orden.num_orden}`);
     }
 
     req.orden = orden; // lo dejamos disponible por si lo querés usar
