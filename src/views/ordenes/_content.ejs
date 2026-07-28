@@ -16,7 +16,7 @@
         <% if (canCreateOrder) { %>
         <button type="button" class="btn btn-primary" id="btnNuevaOT">
             <span class="btn__icon">＋</span>
-            Nueva Orden
+            Nueva orden
         </button>
         <% } %>
 
@@ -25,22 +25,22 @@
     <!-- Filters -->
     <div class="card card--shadow-sm">
         <div class="card__header">
-            <h3 class="card__title">Filtros de Búsqueda</h3>
+            <h3 class="card__title">Filtros de búsqueda</h3>
         </div>
 
         <div class="card__content">
-            <form method="GET" action="/ordenes" class="filters">
+            <form method="GET" action="/ordenes" class="filters order-filters">
 
-                <div class="filters__row">
+                <div class="filters__row order-filters__main">
                     <div class="field field--search">
                         <span class="field__icon">🔍</span>
                         <input class="input input--pl" type="text" name="q"
-                            placeholder="Buscar por # Órden o Trámite..." value="<%= filters.q %>" />
+                            placeholder="Buscar por número de orden o trámite" value="<%= filters.q %>" />
                     </div>
 
                     <div class="field">
                         <select class="select" name="estado">
-                            <option value="all" <%=filters.estado==="all" ? "selected" : "" %>>Todos los Estados
+                            <option value="all" <%=filters.estado==="all" ? "selected" : "" %>>Todos los estados
                             </option>
 
                             <!-- AJUSTÁ estos valores a tus ENUM exactos -->
@@ -59,7 +59,7 @@
 
                     <div class="field">
                         <select class="select" name="prioridad">
-                            <option value="all" <%=filters.prioridad==="all" ? "selected" : "" %>>Todas las Prioridades
+                            <option value="all" <%=filters.prioridad==="all" ? "selected" : "" %>>Todas las prioridades
                             </option>
 
                             <!-- AJUSTÁ a tu ENUM exacto -->
@@ -70,20 +70,22 @@
                     </div>
                 </div>
 
-                <div class="filters__row">
-                    <div class="field">
-                        <span class="field__icon">📅</span>
-                        <input class="input input--pl" type="date" name="desde" value="<%= filters.desde %>" />
-                    </div>
+                <div class="filters__row order-filters__secondary">
+                    <label class="field date-field">
+                        <span class="date-field__label">Desde</span>
+                        <input class="input date-field__input" type="date" name="desde"
+                            aria-label="Fecha desde" value="<%= filters.desde %>" />
+                    </label>
 
-                    <div class="field">
-                        <span class="field__icon">📅</span>
-                        <input class="input input--pl" type="date" name="hasta" value="<%= filters.hasta %>" />
-                    </div>
+                    <label class="field date-field">
+                        <span class="date-field__label">Hasta</span>
+                        <input class="input date-field__input" type="date" name="hasta"
+                            aria-label="Fecha hasta" value="<%= filters.hasta %>" />
+                    </label>
 
-                    <div class="filters__actions">
-                        <a class="btn btn-outline" href="/ordenes">✕ Limpiar Filtros</a>
-                        <button class="btn btn-primary" type="submit">Aplicar</button>
+                    <div class="filters__actions order-filters__actions">
+                        <a class="btn btn-outline" href="/ordenes">✕ Limpiar</a>
+                        <button class="btn btn-primary" type="submit">Aplicar filtros</button>
                     </div>
                 </div>
 
