@@ -1,10 +1,6 @@
 const db = require("../database/models");
 const { Op } = db.Sequelize;
-
-const ESTADOS = [
-  "En espera", "En evaluación", "En ejecución", "Espera de materiales",
-  "Retrasado", "Pausado", "Finalizado", "Cancelado", "Fuera de término",
-];
+const { ESTADOS_OT } = require("../utils/estadosOT");
 
 const PERMISOS = {
   1: ["estado", "fechas", "responsable", "prioridad", "tecnico"],
@@ -168,7 +164,7 @@ const reportesController = {
       return res.render("reportes/index", {
         title: "Reportes", user: req.session.user, currentPath: "/reportes",
         tab, tabsPermitidos, filtros, ordenes, responsables, tecnicos,
-        estados: ESTADOS, resumen,
+        estados: ESTADOS_OT, resumen,
       });
     } catch (error) {
       console.error("Error generando reporte:", error);

@@ -3,6 +3,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const logAudit = require("../helpers/audit");
 const { enviarAltaOrden } = require("../services/notificaciones");
+const { esEstadoOTValido } = require("../utils/estadosOT");
 
 const ITEMS_PER_PAGE = 10; // ajustá si querés 5 como v0
 const { Op } = db.Sequelize;
@@ -181,6 +182,7 @@ const ordenesController = {
         prioridad,
         descripcion,
         id_responsable, // 👈 nuevo
+        estado_actual,
       } = req.body;
 
       // Validación mínima
@@ -252,7 +254,7 @@ const ordenesController = {
           prioridad,
           descripcion: descripcion || null,
           fecha_carga: new Date(),
-          estado_actual: "En espera",
+          estado_actual: esEstadoOTValido(estado_actual) ? estado_actual : "En espera",
           id_operario_creador: idUsuario,
           id_responsable: Number(id_responsable), // ✅ acá la derivación
           activa: true,
@@ -389,6 +391,11 @@ if (req.files && req.files.length) {
         return res.status(400).send("ID inválido");
       }
 
+      if (!esEstadoOTValido(estado)) {
+        await t.rollback();
+        return res.status(400).send("Estado inválido");
+      }
+
       const orden = await db.OrdenTrabajo.findOne({
         where: { num_orden: numOrden },
         transaction: t,
@@ -505,6 +512,10 @@ if (req.files && req.files.length) {
     const esAdmin = Number(req.session.user.id_rol ?? req.session.user.rol) === 1;
     const estadoAnterior = orden.estado_actual;
     const estadoPermitido = esAdmin ? estado_actual : estadoAnterior;
+    if (!esEstadoOTValido(estadoPermitido)) {
+      await t.rollback();
+      return res.status(400).send("Estado inválido");
+    }
     const cambioEstado = estadoAnterior !== estadoPermitido;
 
     await orden.update(

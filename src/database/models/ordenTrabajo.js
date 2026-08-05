@@ -1,3 +1,5 @@
+const { ESTADOS_OT } = require("../../utils/estadosOT");
+
 module.exports = (sequelize, DataTypes) => {
   const OrdenTrabajo = sequelize.define("OrdenTrabajo", {
     num_orden: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
@@ -8,10 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     fecha_carga: { type: DataTypes.DATEONLY, allowNull: false },
     prioridad: { type: DataTypes.ENUM("Alta", "Media", "Baja"), allowNull: false },
     estado_actual: {
-      type: DataTypes.ENUM(
-        "En espera","En evaluación","En ejecución","Espera de materiales",
-        "Retrasado","Pausado","Finalizado","Cancelado","Fuera de término"
-      ),
+      type: DataTypes.ENUM(...ESTADOS_OT),
       allowNull: false,
       defaultValue: "En espera"
     },

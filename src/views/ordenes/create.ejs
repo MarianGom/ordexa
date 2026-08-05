@@ -54,6 +54,15 @@
         <input class="input" type="date" name="fecha_carga" required
           value="<%= values.fecha_carga || new Date().toISOString().slice(0,10) %>">
       </div>
+
+      <div class="field">
+        <label class="label" for="estado_actual">Estado <span class="req">*</span></label>
+        <select class="select" id="estado_actual" name="estado_actual" required>
+          <% ["En espera", "En evaluación", "En ejecución", "Pausado", "Finalizado", "Cancelado"].forEach(estado => { %>
+            <option value="<%= estado %>" <%= (values.estado_actual || "En espera") === estado ? "selected" : "" %>><%= estado %></option>
+          <% }) %>
+        </select>
+      </div>
     </div>
 
     <div class="field">

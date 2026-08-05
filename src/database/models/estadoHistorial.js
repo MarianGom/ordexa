@@ -1,12 +1,11 @@
+const { ESTADOS_OT } = require("../../utils/estadosOT");
+
 module.exports = (sequelize, DataTypes) => {
   const EstadoHistorial = sequelize.define("EstadoHistorial", {
     id_estado: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     num_orden: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     estado_actual: {
-      type: DataTypes.ENUM(
-        "En espera","En evaluación","En ejecución","Espera de materiales",
-        "Retrasado","Pausado","Finalizado","Cancelado","Fuera de término"
-      ),
+      type: DataTypes.ENUM(...ESTADOS_OT),
       allowNull: false
     },
     fecha_cambio: { type: DataTypes.DATE, allowNull: false,    defaultValue: DataTypes.NOW},

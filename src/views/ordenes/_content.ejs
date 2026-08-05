@@ -50,6 +50,8 @@
                                 evaluación</option>
                             <option value="En ejecución" <%=filters.estado==="En ejecución" ? "selected" : "" %>>En
                                 ejecución</option>
+                            <option value="Pausado" <%=filters.estado==="Pausado" ? "selected" : "" %>>Pausado
+                            </option>
                             <option value="Finalizado" <%=filters.estado==="Finalizado" ? "selected" : "" %>>Finalizado
                             </option>
                             <option value="Cancelado" <%=filters.estado==="Cancelado" ? "selected" : "" %>>Cancelado
@@ -154,6 +156,8 @@
                                                     <span class="badge badge--st-yellow">En evaluación</span>
                                                     <% } else if (st==="En espera" ) { %>
                                                         <span class="badge badge--st-gray">En espera</span>
+                                                        <% } else if (st==="Pausado" ) { %>
+                                                            <span class="badge badge--st-yellow">Pausado</span>
                                                         <% } else if (st==="Finalizado" ) { %>
                                                             <span class="badge badge--st-green">Finalizado</span>
                                                             <% } else if (st==="Cancelado" ) { %>

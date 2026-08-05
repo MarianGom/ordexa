@@ -54,10 +54,8 @@
           <%
             const estadoClase = {
               "En espera":"estado--espera", "En evaluación":"estado--evaluacion",
-              "En ejecución":"estado--ejecucion", "Espera de materiales":"estado--materiales",
-              "Retrasado":"estado--retrasado", "Pausado":"estado--pausado",
-              "Finalizado":"estado--finalizado", "Cancelado":"estado--cancelado",
-              "Fuera de término":"estado--fuera"
+              "En ejecución":"estado--ejecucion", "Pausado":"estado--pausado",
+              "Finalizado":"estado--finalizado", "Cancelado":"estado--cancelado"
             }[orden.estado_actual] || "estado--espera";
           %>
           <div class="result">

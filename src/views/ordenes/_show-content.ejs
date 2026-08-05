@@ -123,8 +123,7 @@
               <select class="select" name="estado" required>
                 <% [
                   "En espera", "En evaluación", "En ejecución",
-                  "Espera de materiales", "Retrasado", "Pausado",
-                  "Finalizado", "Cancelado", "Fuera de término"
+                  "Pausado", "Finalizado", "Cancelado"
                 ].forEach(estado => { %>
                   <option value="<%= estado %>" <%= orden.estado_actual === estado ? "selected" : "" %>><%= estado %></option>
                 <% }) %>
